@@ -1,4 +1,4 @@
-name: Build Single JazzCash APK
+name: Build Rising Jazz Merchant APK
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build & Release Single APK
+    name: Build & Release Rising Jazz Merchant APK
     runs-on: ubuntu-latest
 
     steps:
@@ -34,30 +34,30 @@ jobs:
     - name: Prepare Release Output
       run: |
         mkdir -p release-output
-        cp app/build/outputs/apk/debug/app-debug.apk release-output/JazzCash-Soundbox-AllInOne.apk
+        cp app/build/outputs/apk/debug/app-debug.apk release-output/Rising-Jazz-Merchant.apk
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: JazzCash-Soundbox-AllInOne-APK
-        path: release-output/JazzCash-Soundbox-AllInOne.apk
+        name: Rising-Jazz-Merchant-APK
+        path: release-output/Rising-Jazz-Merchant.apk
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: v1.0.0-${{ github.run_number }}
-        name: JazzCash Soundbox All-In-One v1.0.0
+        name: Rising Jazz Merchant v1.0.0
         body: |
-          ### 🎉 JazzCash Single All-In-One Soundbox APK
+          ### 🎉 Rising Jazz Merchant (رائزنگ جاز مرچنٹ) - Official APK
 
           ✅ **Features:**
-          - 📢 **Voice Announcement:** Automatically speaks aloud *"JazzCash par [amount] rupay receive ho gaye"* on mobile/Bluetooth speaker.
-          - 🌐 **Instant Webhook Sync:** Silently sends payment data to your Hostinger Web Admin Panel.
+          - 📢 **Soundbox Voice Announcement:** Automatically speaks aloud *"JazzCash par [amount] rupay receive ho gaye"* when payment arrives.
+          - 🌐 **Instant Webhook Sync:** Silently sends transaction data to your Hostinger Web Admin Panel.
           - 🏪 Supports both **Shop Merchant Till/QR** and **Personal** accounts.
           
-          **Download:** Click the `JazzCash-Soundbox-AllInOne.apk` link below.
+          **Direct Download:** Click `Rising-Jazz-Merchant.apk` below to install directly on your phone.
         draft: false
         prerelease: false
-        files: release-output/JazzCash-Soundbox-AllInOne.apk
+        files: release-output/Rising-Jazz-Merchant.apk
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
