@@ -2,10 +2,13 @@ package com.jazzcash.notifier;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,7 +20,7 @@ import java.util.Locale;
 public class MainActivity extends Activity {
     private static final int PERMISSION_REQ_CODE = 101;
     private EditText etWebhookUrl;
-    private TextView tvStatus;
+    private TextView tvStatus, tvLastEvent;
     private SharedPreferences prefs;
     private TextToSpeech testTts;
 
@@ -30,12 +33,15 @@ public class MainActivity extends Activity {
 
         etWebhookUrl = findViewById(R.id.etWebhookUrl);
         tvStatus = findViewById(R.id.tvStatus);
+        tvLastEvent = findViewById(R.id.tvLastEvent);
         Button btnSave = findViewById(R.id.btnSave);
         Button btnTestVoice = findViewById(R.id.btnTestVoice);
+        Button btnNotifPermission = findViewById(R.id.btnNotifPermission);
 
-        // Load saved Webhook URL
         String savedUrl = prefs.getString("webhook_url", "https://yourdomain.com/api/webhook.php");
         etWebhookUrl.setText(savedUrl);
+
+        updateDebugStatus();
 
         btnSave.setOnClickListener(v -> {
             String url = etWebhookUrl.getText().toString().trim();
@@ -48,7 +54,7 @@ public class MainActivity extends Activity {
             Toast.makeText(this, "Settings Saved Successfully!", Toast.LENGTH_SHORT).show();
         });
 
-        // Initialize test TTS
+        // Initialize TTS
         testTts = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
                 testTts.setLanguage(new Locale("hi", "IN"));
@@ -60,10 +66,27 @@ public class MainActivity extends Activity {
             if (testTts != null) {
                 testTts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "TEST_ALERT");
             }
-            Toast.makeText(this, "Testing Speaker: " + text, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Awaaz suniye: " + text, Toast.LENGTH_LONG).show();
+        });
+
+        btnNotifPermission.setOnClickListener(v -> {
+            startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
+            Toast.makeText(this, "Rising Jazz Merchant ko ON kar dein", Toast.LENGTH_LONG).show();
         });
 
         checkPermissions();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateDebugStatus();
+    }
+
+    private void updateDebugStatus() {
+        String lastEvent = prefs.getString("last_event", "No payments detected yet.");
+        String lastStatus = prefs.getString("last_webhook_status", "Not sent yet");
+        tvLastEvent.setText("Last Event: " + lastEvent + "\nWebhook: " + lastStatus);
     }
 
     private void checkPermissions() {
@@ -75,10 +98,8 @@ public class MainActivity extends Activity {
                     Manifest.permission.READ_SMS
                 }, PERMISSION_REQ_CODE);
             } else {
-                tvStatus.setText("Status: Listening for Payments 🟢");
+                tvStatus.setText("Status: Ready & Listening 🟢");
             }
-        } else {
-            tvStatus.setText("Status: Listening for Payments 🟢");
         }
     }
 

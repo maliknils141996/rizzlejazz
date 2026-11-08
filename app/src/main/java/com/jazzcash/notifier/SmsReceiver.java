@@ -18,9 +18,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SmsReceiver extends BroadcastReceiver {
-    private static final String TAG = "JazzCashReceiver";
+    private static final String TAG = "JazzCashSmsReceiver";
     private static TextToSpeech tts;
-    private static boolean isTtsInitialized = false;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -43,60 +42,69 @@ public class SmsReceiver extends BroadcastReceiver {
             fullMsg.append(sms.getMessageBody());
         }
 
-        String message = fullMsg.toString();
-        Log.d(TAG, "Incoming SMS from: " + sender + " | Text: " + message);
+        final String message = fullMsg.toString();
+        final String finalSender = sender;
+        Log.d(TAG, "SMS received from: " + sender + " | Body: " + message);
 
-        // Filter: Check if SMS is from JazzCash / 8558 or contains payment keywords
-        boolean isJazzCash = sender.contains("8558") || 
-                             message.toLowerCase().contains("jazzcash") || 
-                             message.toLowerCase().contains("received rs") ||
-                             message.toLowerCase().contains("till id");
+        // Keep BroadcastReceiver alive with goAsync()
+        final PendingResult pendingResult = goAsync();
 
-        if (isJazzCash) {
-            processPayment(context, sender, message);
-        }
+        new Thread(() -> {
+            try {
+                handleSms(context, finalSender, message);
+            } finally {
+                pendingResult.finish();
+            }
+        }).start();
     }
 
-    private void processPayment(Context context, String sender, String message) {
-        // Ignore debit/transferred out messages
+    private void handleSms(Context context, String sender, String message) {
         String lowerMsg = message.toLowerCase();
+
+        // Safety: ignore debit/sent messages
         if (lowerMsg.contains("transferred to") || lowerMsg.contains("sent to") || lowerMsg.contains("paid to")) {
             return;
         }
 
-        // 1. Extract Amount
+        // Check if from JazzCash or contains payment info
+        boolean isJazzCash = sender.contains("8558") || 
+                             lowerMsg.contains("jazzcash") || 
+                             lowerMsg.contains("received rs") ||
+                             lowerMsg.contains("till id") ||
+                             lowerMsg.contains("payment of rs");
+
+        if (!isJazzCash) {
+            return;
+        }
+
+        // Extract Amount
         String amount = "";
         Pattern pattern = Pattern.compile("(?:Received|received|Payment of)\\s*Rs\\.?\\s*([0-9,]+(?:\\.[0-9]{1,2})?)", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(message);
         if (matcher.find()) {
             amount = matcher.group(1).replace(",", "");
         } else {
-            // Fallback pattern: "Rs 500 received"
-            Pattern fallback = Pattern.compile("Rs\\.?\\s*([0-9,]+(?:\\.[0-9]{1,2})?)\\s*(?:received|credited)", Pattern.CASE_INSENSITIVE);
-            Matcher m2 = fallback.matcher(message);
+            Pattern p2 = Pattern.compile("Rs\\.?\\s*([0-9,]+(?:\\.[0-9]{1,2})?)", Pattern.CASE_INSENSITIVE);
+            Matcher m2 = p2.matcher(message);
             if (m2.find()) {
                 amount = m2.group(1).replace(",", "");
             }
         }
 
-        // 2. Play Voice Announcement (Soundbox Alert)
-        final String speechText;
-        if (!amount.isEmpty()) {
-            speechText = "JazzCash par " + amount + " rupay receive ho gaye hain";
-        } else {
-            speechText = "JazzCash par payment receive ho gayi hai";
-        }
+        // Voice Alert
+        final String speechText = !amount.isEmpty() 
+            ? "JazzCash par " + amount + " rupay receive ho gaye hain"
+            : "JazzCash par payment receive ho gayi hai";
 
         speakVoice(context, speechText);
 
-        // 3. Post to Webhook on Hostinger
+        // Send to Webhook
         SharedPreferences prefs = context.getSharedPreferences("JazzCashPrefs", Context.MODE_PRIVATE);
-        String webhookUrl = prefs.getString("webhook_url", "");
+        prefs.edit().putString("last_sms", "Rs. " + amount + " from " + sender).apply();
 
+        String webhookUrl = prefs.getString("webhook_url", "");
         if (!webhookUrl.isEmpty()) {
-            final String fSender = sender;
-            final String fMessage = message;
-            new Thread(() -> sendWebhook(webhookUrl, fSender, fMessage)).start();
+            sendHttp(webhookUrl, sender, message, prefs);
         }
     }
 
@@ -104,25 +112,26 @@ public class SmsReceiver extends BroadcastReceiver {
         if (tts == null) {
             tts = new TextToSpeech(context.getApplicationContext(), status -> {
                 if (status == TextToSpeech.SUCCESS) {
-                    isTtsInitialized = true;
                     tts.setLanguage(new Locale("hi", "IN"));
-                    tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "JC_ALERT");
+                    tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "SMS_ALERT");
                 }
             });
         } else {
-            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "JC_ALERT");
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "SMS_ALERT");
         }
     }
 
-    private void sendWebhook(String urlStr, String sender, String message) {
+    private void sendHttp(String urlStr, String sender, String message, SharedPreferences prefs) {
         try {
             URL url = new URL(urlStr);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            conn.setRequestProperty("User-Agent", "RisingJazzMerchant/1.0");
+            conn.setInstanceFollowRedirects(true);
             conn.setDoOutput(true);
-            conn.setConnectTimeout(8000);
-            conn.setReadTimeout(8000);
+            conn.setConnectTimeout(10000);
+            conn.setReadTimeout(10000);
 
             String json = String.format("{\"from\":\"%s\",\"text\":\"%s\"}", 
                 escape(sender), escape(message));
@@ -133,18 +142,17 @@ public class SmsReceiver extends BroadcastReceiver {
             }
 
             int code = conn.getResponseCode();
-            Log.d(TAG, "Webhook posted, HTTP response: " + code);
+            Log.d(TAG, "Webhook HTTP code: " + code);
+            prefs.edit().putString("last_webhook_status", "HTTP " + code + " at " + new java.util.Date().toString()).apply();
             conn.disconnect();
         } catch (Exception e) {
-            Log.e(TAG, "Webhook POST error: " + e.getMessage());
+            Log.e(TAG, "Webhook exception: " + e.getMessage());
+            prefs.edit().putString("last_webhook_status", "Error: " + e.getMessage()).apply();
         }
     }
 
     private String escape(String s) {
         if (s == null) return "";
-        return s.replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", " ")
-                .replace("\r", " ");
+        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ").replace("\r", " ");
     }
 }

@@ -1,78 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center_horizontal"
     android:background="#0F172A">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Rising Jazz Merchant"
-        android:textColor="#FFFFFF"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:layout_marginTop="20dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Automatic Voice Alerts &amp; Webhook Forwarder"
-        android:textColor="#94A3B8"
-        android:textSize="12sp"
-        android:layout_marginBottom="30dp" />
-
-    <TextView
-        android:id="@+id/tvStatus"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Status: Ready"
-        android:textColor="#10B981"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:padding="12dp"
-        android:background="#1E293B"
-        android:layout_marginBottom="24dp" />
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:gravity="center_horizontal">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Your Hostinger Webhook URL:"
-        android:textColor="#CBD5E1"
-        android:textSize="13sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="6dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rizzle Jazz Merchant"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp" />
 
-    <EditText
-        android:id="@+id/etWebhookUrl"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="https://yourdomain.com/api/webhook.php"
-        android:textColorHint="#64748B"
-        android:textColor="#FFFFFF"
-        android:background="#1E293B"
-        android:padding="14dp"
-        android:textSize="13sp"
-        android:layout_marginBottom="20dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Official Voice Soundbox &amp; Webhook Hub"
+            android:textColor="#94A3B8"
+            android:textSize="12sp"
+            android:layout_marginBottom="20dp" />
 
-    <Button
-        android:id="@+id/btnSave"
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:text="Save &amp; Activate Service"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#DC2626"
-        android:layout_marginBottom="12dp" />
+        <!-- Status Card -->
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Status: Ready &amp; Listening 🟢"
+            android:textColor="#10B981"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:padding="12dp"
+            android:background="#1E293B"
+            android:layout_marginBottom="16dp" />
 
-    <Button
-        android:id="@+id/btnTestVoice"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:text="🔊 Test Voice Speaker"
-        android:textColor="#CBD5E1"
-        android:backgroundTint="#334155" />
+        <!-- Webhook Input -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your Hostinger Webhook URL:"
+            android:textColor="#CBD5E1"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp" />
 
-</LinearLayout>
+        <EditText
+            android:id="@+id/etWebhookUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="https://yourdomain.com/api/webhook.php"
+            android:textColorHint="#64748B"
+            android:textColor="#FFFFFF"
+            android:background="#1E293B"
+            android:padding="14dp"
+            android:textSize="13sp"
+            android:layout_marginBottom="14dp" />
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Save &amp; Activate Service"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#DC2626"
+            android:layout_marginBottom="10dp" />
+
+        <!-- Notification Soundbox Permission Button -->
+        <Button
+            android:id="@+id/btnNotifPermission"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="🔔 Enable Notification Soundbox (Recommended)"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#059669"
+            android:layout_marginBottom="10dp" />
+
+        <!-- Test Speaker Button -->
+        <Button
+            android:id="@+id/btnTestVoice"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="🔊 Test Voice Speaker"
+            android:textColor="#CBD5E1"
+            android:backgroundTint="#334155"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Live Activity Log -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Live Activity Monitor:"
+            android:textColor="#94A3B8"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/tvLastEvent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Waiting for transactions..."
+            android:textColor="#E2E8F0"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:padding="12dp"
+            android:background="#020617" />
+
+    </LinearLayout>
+</ScrollView>

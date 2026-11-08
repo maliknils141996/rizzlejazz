@@ -1,4 +1,4 @@
-name: Build Rising Jazz Merchant APK
+name: Build Rizzle Jazz Merchant APK
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: Build & Release Rising Jazz Merchant APK
+    name: Build & Release Rizzle Jazz Merchant APK
     runs-on: ubuntu-latest
 
     steps:
@@ -36,30 +36,31 @@ jobs:
     - name: Prepare Release Output
       run: |
         mkdir -p release-output
-        cp app/build/outputs/apk/debug/app-debug.apk release-output/Rising-Jazz-Merchant.apk
+        cp app/build/outputs/apk/debug/app-debug.apk release-output/Rizzle-Jazz-Merchant.apk
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Rising-Jazz-Merchant-APK
-        path: release-output/Rising-Jazz-Merchant.apk
+        name: Rizzle-Jazz-Merchant-APK
+        path: release-output/Rizzle-Jazz-Merchant.apk
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: v1.0.0-${{ github.run_number }}
-        name: Rising Jazz Merchant v1.0.0
+        name: Rizzle Jazz Merchant v1.0.0
         body: |
-          ### 🎉 Rising Jazz Merchant (رائزنگ جاز مرچنٹ) - Official APK
+          ### 🎉 Rizzle Jazz Merchant - Official Soundbox & Webhook APK
 
           ✅ **Features:**
           - 📢 **Soundbox Voice Announcement:** Automatically speaks aloud *"JazzCash par [amount] rupay receive ho gaye"* when payment arrives.
+          - 🔔 **Notification & SMS Listener:** Captures both SMS (8558) and JazzCash app push notifications.
           - 🌐 **Instant Webhook Sync:** Silently sends transaction data to your Hostinger Web Admin Panel.
           - 🏪 Supports both **Shop Merchant Till/QR** and **Personal** accounts.
           
-          **Direct Download:** Click `Rising-Jazz-Merchant.apk` below to install directly on your phone.
+          **Direct Download:** Click `Rizzle-Jazz-Merchant.apk` below to install directly on your phone.
         draft: false
         prerelease: false
-        files: release-output/Rising-Jazz-Merchant.apk
+        files: release-output/Rizzle-Jazz-Merchant.apk
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
