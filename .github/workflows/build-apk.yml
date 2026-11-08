@@ -1,0 +1,63 @@
+name: Build Single JazzCash APK
+
+on:
+  push:
+    branches: [ "**" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Release Single APK
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.5'
+
+    - name: Build APK with Gradle
+      run: gradle assembleDebug --stacktrace
+
+    - name: Prepare Release Output
+      run: |
+        mkdir -p release-output
+        cp app/build/outputs/apk/debug/app-debug.apk release-output/JazzCash-Soundbox-AllInOne.apk
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: JazzCash-Soundbox-AllInOne-APK
+        path: release-output/JazzCash-Soundbox-AllInOne.apk
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v1.0.0-${{ github.run_number }}
+        name: JazzCash Soundbox All-In-One v1.0.0
+        body: |
+          ### 🎉 JazzCash Single All-In-One Soundbox APK
+
+          ✅ **Features:**
+          - 📢 **Voice Announcement:** Automatically speaks aloud *"JazzCash par [amount] rupay receive ho gaye"* on mobile/Bluetooth speaker.
+          - 🌐 **Instant Webhook Sync:** Silently sends payment data to your Hostinger Web Admin Panel.
+          - 🏪 Supports both **Shop Merchant Till/QR** and **Personal** accounts.
+          
+          **Download:** Click the `JazzCash-Soundbox-AllInOne.apk` link below.
+        draft: false
+        prerelease: false
+        files: release-output/JazzCash-Soundbox-AllInOne.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
