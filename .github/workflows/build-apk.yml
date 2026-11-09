@@ -47,17 +47,18 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v2.3.0-${{ github.run_number }}
-        name: PayVox v2.3 - Fixed Channel Audio & Sophisticated UI
+        tag_name: v2.4.0-${{ github.run_number }}
+        name: PayVox v2.4 - Full Raast & App Notification Soundbox (Wi-Fi & SIM-less)
         body: |
-          ### 💜 PayVox v2.3 - Final Production Build
+          ### 💜 PayVox v2.4 - Wi-Fi & SIM-less Soundbox + Raast Support
 
-          ✅ **Key Fixes:**
-          - 🎯 **Fixed False Trigger & Double Announcement:** Strict 8558/3737 shortcode verification and outbound notification suppression. JazzCash speaks strictly on JazzCash payment; Easypaisa speaks strictly on Easypaisa payment.
-          - 📒 **Dual Khata System:** JazzCash Khata and Easypaisa Khata are completely segregated with independent Net Balances.
-          - 📅 **Sophisticated Segmented Filter:** Compact, responsive `Today` | `Yesterday` | `This Month` | `📅 Custom` date picker that fits on all phone screens without cutting off.
-          - 🎨 **Executive Bright White UI:** Clean off-white background, luxury royal purple balance card, and crisp typography.
-          
+          ✅ **Key Upgrades:**
+          - 📡 **Works Without SIM (Wi-Fi Mode):** Full real-time incoming payment detection directly from JazzCash & Easypaisa push notifications (e.g. Raast incoming payments).
+          - ⚡ **Raast Payment Voice & Ledger:** Detects `Rs [amount] received from [Sender] AC ... via Raast`, speaks sender amount out loud, and logs sender name cleanly to the Khata.
+          - 🛡️ **Intelligent Deduplication:** When both SMS and App Push Notification arrive for the same payment, PayVox announces ONLY ONCE and prevents duplicate ledger entries.
+          - 🔇 **Outbound & Bonus Filter:** Mutes cashbacks, rewards, and outbound transfer notifications. Only real incoming customer money speaks.
+          - 🎯 **Dual Khata System:** Independent balance tracking for JazzCash & Easypaisa.
+
           **Direct Download:** Click `PayVox.apk` below to download and install.
         draft: false
         prerelease: false

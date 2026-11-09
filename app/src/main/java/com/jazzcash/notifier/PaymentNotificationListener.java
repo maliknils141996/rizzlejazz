@@ -42,40 +42,45 @@ public class PaymentNotificationListener extends NotificationListenerService {
         String fullContent = (title + " " + body).trim();
         String lowerContent = fullContent.toLowerCase();
 
-        // 2. Outbound notifications must NEVER trigger an incoming payment alert!
-        // E.g. If merchant sends money via Easypaisa/JazzCash app: "Payment of Rs 1 was successful", "You sent money"
-        if (lowerContent.contains("sent") ||
-            lowerContent.contains("transferred") ||
-            lowerContent.contains("paid") ||
-            lowerContent.contains("successful to") ||
-            lowerContent.contains("payment to") ||
-            lowerContent.contains("debited") ||
-            lowerContent.contains("otp") ||
-            lowerContent.contains("login") ||
-            lowerContent.contains("balance")) {
-            Log.d(TAG, "Ignoring outbound/system notification: " + fullContent);
-            return;
-        }
-
-        // 3. Must explicitly contain proof of incoming received payment
-        boolean isExplicitIncoming = lowerContent.contains("received rs") ||
-                                     lowerContent.contains("has received") ||
-                                     lowerContent.contains("payment received") ||
+        // 2. Proof of incoming payment (matches Raast, JazzCash app, Easypaisa app, Bank alerts)
+        boolean isExplicitIncoming = lowerContent.contains("received") ||
+                                     lowerContent.contains("incoming payment") ||
                                      lowerContent.contains("has sent you") ||
-                                     lowerContent.contains("credited with");
+                                     lowerContent.contains("sent you") ||
+                                     lowerContent.contains("credited") ||
+                                     lowerContent.contains("deposited");
 
         if (!isExplicitIncoming) {
             Log.d(TAG, "Ignoring non-incoming payment notification: " + fullContent);
             return;
         }
 
-        // 4. Identify Channel strictly
+        // 3. Outbound notifications must NEVER trigger an incoming alert
+        // (E.g. Merchant sends money out: "You sent Rs 500 to...", "Payment of Rs 1 was successful to...", "transferred to...")
+        if (lowerContent.contains("you have sent") ||
+            lowerContent.contains("you sent") ||
+            lowerContent.contains("paid to") ||
+            (lowerContent.contains("payment to") && !lowerContent.contains("received")) ||
+            (lowerContent.contains("successful to") && !lowerContent.contains("received")) ||
+            lowerContent.contains("transferred to") ||
+            lowerContent.contains("cash withdrawal") ||
+            lowerContent.contains("withdrawn rs") ||
+            lowerContent.contains("debited") ||
+            lowerContent.contains("otp") ||
+            lowerContent.contains("login") ||
+            lowerContent.contains("balance inquiry")) {
+            Log.d(TAG, "Ignoring outbound/system notification: " + fullContent);
+            return;
+        }
+
+        // 4. Identify Channel strictly (8558 = JazzCash, 3737 = Easypaisa)
         String senderContext;
-        if (pkg.contains("mobilink") || pkg.contains("jazzcash") || title.contains("JazzCash") || lowerContent.contains("jazzcash")) {
+        if (pkg.contains("mobilink") || pkg.contains("jazzcash") || title.toLowerCase().contains("jazzcash") || lowerContent.contains("jazzcash")) {
             senderContext = "8558";
-        } else if (pkg.contains("telenor") || pkg.contains("easypaisa") || title.contains("Easypaisa") || lowerContent.contains("easypaisa")) {
+        } else if (pkg.contains("telenor") || pkg.contains("easypaisa") || title.toLowerCase().contains("easypaisa") || lowerContent.contains("easypaisa")) {
             senderContext = "3737";
         } else {
+            Log.d(TAG, "Notification not from JazzCash or Easypaisa app: " + pkg);
             return;
         }
 
