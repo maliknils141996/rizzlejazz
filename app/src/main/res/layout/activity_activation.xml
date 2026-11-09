@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#0B0F19">
+    android:background="#0F0C1B">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,38 +13,28 @@
         android:padding="24dp">
 
         <!-- LOGO ICON -->
-        <FrameLayout
-            android:layout_width="84dp"
-            android:layout_height="84dp"
+        <ImageView
+            android:layout_width="96dp"
+            android:layout_height="96dp"
             android:layout_marginTop="32dp"
-            android:background="@drawable/card_hero"
-            android:elevation="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="RJ"
-                android:textColor="#FFFFFF"
-                android:textSize="32sp"
-                android:textStyle="bold"
-                android:layout_gravity="center" />
-        </FrameLayout>
+            android:src="@drawable/app_logo"
+            android:elevation="8dp" />
 
         <!-- TITLE -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Rizzle Merchant"
+            android:text="PayVox"
             android:textColor="#FFFFFF"
-            android:textSize="24sp"
+            android:textSize="26sp"
             android:textStyle="bold"
             android:layout_marginTop="16dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Official JazzCash &amp; Easypaisa Soundbox Khata"
-            android:textColor="#94A3B8"
+            android:text="JazzCash &amp; Easypaisa Soundbox Khata"
+            android:textColor="#C4B5FD"
             android:textSize="12sp"
             android:layout_marginTop="4dp" />
 
@@ -61,7 +51,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="YOUR UNIQUE DEVICE ID:"
-                android:textColor="#10B981"
+                android:textColor="#A78BFA"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.08" />
@@ -78,7 +68,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="RJ-XXXX-XXXX"
+                    android:text="PV-XXXX-XXXX"
                     android:textColor="#FFFFFF"
                     android:textSize="18sp"
                     android:fontFamily="monospace"
@@ -89,10 +79,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="38dp"
                     android:text="Copy ID"
-                    android:textColor="#10B981"
+                    android:textColor="#FFFFFF"
                     android:textSize="11sp"
                     android:textStyle="bold"
-                    android:backgroundTint="#064E3B"
+                    android:backgroundTint="#7C3AED"
                     android:insetTop="0dp"
                     android:insetBottom="0dp" />
             </LinearLayout>
@@ -129,7 +119,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:background="@drawable/input_bg"
-                android:hint="RJ-XXXX-YYYY"
+                android:hint="PV-XXXX-YYYY"
                 android:textColorHint="#475569"
                 android:textColor="#10B981"
                 android:fontFamily="monospace"

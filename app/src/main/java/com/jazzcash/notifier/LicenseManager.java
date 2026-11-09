@@ -31,7 +31,7 @@ public class LicenseManager {
     private static final String KEY_LAST_SEEN = "last_clock_seen";
     private static final String KEY_BLACKLISTED = "is_device_blacklisted";
 
-    // Generate unique Device ID for this phone (e.g. RJ-9A4B-88F1)
+    // Generate unique Device ID for this phone (e.g. PV-9A4B-88F1)
     public static String getDeviceId(Context context) {
         String androidId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         if (androidId == null || androidId.isEmpty()) {
@@ -41,7 +41,7 @@ public class LicenseManager {
         if (clean.length() < 8) {
             clean = (clean + "00000000").substring(0, 8);
         }
-        return "RJ-" + clean.substring(0, 4) + "-" + clean.substring(4, 8);
+        return "PV-" + clean.substring(0, 4) + "-" + clean.substring(4, 8);
     }
 
     public static boolean isLicenseActive(Context context) {
@@ -76,8 +76,8 @@ public class LicenseManager {
         if (inputKey == null) return new ValidationResult(false, "License key cannot be empty.");
         String key = inputKey.trim();
 
-        if (!key.startsWith("RJ-")) {
-            return new ValidationResult(false, "Invalid format. Key must start with RJ-");
+        if (!key.startsWith("PV-") && !key.startsWith("RJ-")) {
+            return new ValidationResult(false, "Invalid format. Key must start with PV-");
         }
 
         String[] parts = key.split("-");

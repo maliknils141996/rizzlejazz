@@ -103,7 +103,7 @@ public class ActivationActivity extends Activity {
 
     private void openWhatsAppForSupport() {
         try {
-            String text = "Hello! I want to request a trial/license for Rizzle Merchant Soundbox.\nMy Device ID: " + currentDeviceId;
+            String text = "Hello! I want to request a trial/license for PayVox Soundbox.\nMy Device ID: " + currentDeviceId;
             String encoded = URLEncoder.encode(text, StandardCharsets.UTF_8.name());
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse("https://wa.me/?text=" + encoded));

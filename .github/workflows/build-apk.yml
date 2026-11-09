@@ -1,4 +1,4 @@
-name: Build Rizzle Merchant Soundbox & Khata APK
+name: Build PayVox Smart Soundbox & Khata APK
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: Build & Release Rizzle Merchant APK
+    name: Build & Release PayVox APK
     runs-on: ubuntu-latest
 
     steps:
@@ -36,34 +36,34 @@ jobs:
     - name: Prepare Release Output
       run: |
         mkdir -p release-output
-        cp app/build/outputs/apk/debug/app-debug.apk release-output/Rizzle-Merchant-Soundbox.apk
+        cp app/build/outputs/apk/debug/app-debug.apk release-output/PayVox.apk
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Rizzle-Merchant-Soundbox-APK
-        path: release-output/Rizzle-Merchant-Soundbox.apk
+        name: PayVox-APK
+        path: release-output/PayVox.apk
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v2.0.0-${{ github.run_number }}
-        name: Rizzle Merchant Soundbox & Khata v2.0
+        tag_name: v2.1.0-${{ github.run_number }}
+        name: PayVox v2.1 - Smart Soundbox & Khata
         body: |
-          ### 🎉 Rizzle Merchant - Offline Soundbox & Shop Khata APK
+          ### 💜 PayVox - Smart Soundbox & Khata (100% Offline)
 
           ✅ **Key Features:**
-          - 📢 **Dual Voice Soundbox:** Real-time Urdu voice announcements for **JazzCash** (`8558`) and **Easypaisa** (`3737`).
-          - 🔐 **Device-Locked Cryptographic Licensing:** Offline HMAC-SHA256 license security (1-Day Trial, Monthly, Yearly).
-          - 📒 **100% Offline SQLite Khata:** Built-in Shop Ledger tracking Net Balance (`Inflow - Outflow`).
-          - 💸 **Cash Out / Withdrawal Management:** Record money transferred out with user notes, recipients, and purpose.
-          - ➕ **Cash In Counter Sale:** Record walk-in counter sales.
+          - 🎨 **New Royal Purple Theme & "P!" App Icon**
+          - 📢 **Dual Voice Soundbox:** Real-time Urdu announcements for **JazzCash** (`8558`) and **Easypaisa** (`3737`).
+          - 🛡️ **Smart Anti-Spam Filter:** Automatically filters out Till QR cashback/bonus/incentive spam so it never interrupts actual payment announcements.
+          - ⚡ **100% Automated Outflow & Inflow:** Incoming payments add to Net Balance; money sent/transferred out is automatically deducted from Net Balance without manual work.
+          - 🔐 **Device-Locked Cryptographic Licensing:** Offline HMAC-SHA256 security (1-Day Trial, Monthly, Yearly).
+          - 📒 **100% Offline SQLite Khata:** Built-in Ledger tracking Net Balance (`Inflow - Outflow`).
           - 💬 **WhatsApp Khata Sharing:** 1-Click shareable daily/monthly ledger summaries.
-          - 🚫 **Anti-Cheating Protection:** Instant remote blacklist deactivation for lost/stolen phones.
           
-          **Direct Download:** Click `Rizzle-Merchant-Soundbox.apk` below to download and install.
+          **Direct Download:** Click `PayVox.apk` below to download and install.
         draft: false
         prerelease: false
-        files: release-output/Rizzle-Merchant-Soundbox.apk
+        files: release-output/PayVox.apk
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

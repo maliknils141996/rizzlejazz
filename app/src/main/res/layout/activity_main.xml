@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#0B0F19">
+    android:background="#0F0C1B">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,20 +19,11 @@
             android:gravity="center_vertical"
             android:layout_marginTop="8dp">
 
-            <FrameLayout
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:background="@drawable/card_pill_inflow">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="RJ"
-                    android:textColor="#FFFFFF"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_gravity="center" />
-            </FrameLayout>
+            <ImageView
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:src="@drawable/app_logo"
+                android:elevation="4dp" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -44,16 +35,16 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Rizzle Merchant"
+                    android:text="PayVox"
                     android:textColor="#FFFFFF"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Automated Soundbox &amp; Khata"
-                    android:textColor="#94A3B8"
+                    android:text="Smart Soundbox &amp; Khata"
+                    android:textColor="#C4B5FD"
                     android:textSize="11sp" />
             </LinearLayout>
 
@@ -69,12 +60,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="🟢 Active"
-                    android:textColor="#10B981"
+                    android:textColor="#C4B5FD"
                     android:textSize="10sp"
                     android:textStyle="bold"
                     android:paddingHorizontal="8dp"
                     android:paddingVertical="3dp"
-                    android:background="#064E3B" />
+                    android:background="#5B21B6" />
 
                 <Button
                     android:id="@+id/btnSoundToggle"
@@ -83,7 +74,7 @@
                     android:text="🔊 Voice ON"
                     android:textColor="#FFFFFF"
                     android:textSize="10sp"
-                    android:backgroundTint="#1E293B"
+                    android:backgroundTint="#241C40"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
                     android:layout_marginTop="4dp" />
@@ -96,7 +87,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#1E293B"
+            android:background="#241C40"
             android:padding="12dp"
             android:layout_marginTop="16dp">
 
@@ -112,7 +103,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="To automatically announce incoming payments out loud, please grant notification access."
-                android:textColor="#94A3B8"
+                android:textColor="#C4B5FD"
                 android:textSize="11sp"
                 android:layout_marginTop="2dp" />
 
@@ -123,7 +114,7 @@
                 android:text="Grant Access"
                 android:textColor="#FFFFFF"
                 android:textSize="11sp"
-                android:backgroundTint="#059669"
+                android:backgroundTint="#7C3AED"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:layout_marginTop="6dp" />
@@ -403,7 +394,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Rizzle Merchant • 100% Offline Secured Khata"
+            android:text="PayVox • 100% Offline Secured Khata"
             android:textColor="#334155"
             android:textSize="11sp"
             android:gravity="center"

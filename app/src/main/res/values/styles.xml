@@ -1,9 +1,9 @@
 <resources>
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">#10B981</item>
-        <item name="colorPrimaryDark">#0B0F19</item>
-        <item name="colorAccent">#10B981</item>
-        <item name="android:windowBackground">#0B0F19</item>
-        <item name="android:statusBarColor">#0B0F19</item>
+        <item name="colorPrimary">#7C3AED</item>
+        <item name="colorPrimaryDark">#0F0C1B</item>
+        <item name="colorAccent">#A78BFA</item>
+        <item name="android:windowBackground">#0F0C1B</item>
+        <item name="android:statusBarColor">#0F0C1B</item>
     </style>
 </resources>
