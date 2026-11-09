@@ -65,7 +65,7 @@ public class VoiceEngine {
 
     public void speak(String text) {
         if (tts != null && isReady) {
-            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "PAYMENT_ANNOUNCE");
+            tts.speak(text, TextToSpeech.QUEUE_ADD, null, "PAYMENT_ANNOUNCE");
         } else {
             initTts();
         }

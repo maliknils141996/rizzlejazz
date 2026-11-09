@@ -2,29 +2,25 @@ package com.jazzcash.notifier;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -49,11 +45,13 @@ public class MainActivity extends Activity {
     private TextView tvOutflowCount;
     private Button btnShareSummary;
 
-    private Button btnCashIn;
-    private Button btnCashOut;
-
-    private Spinner spDateFilter;
+    // Filter Pill Tabs
+    private Button btnFilterToday;
+    private Button btnFilterYesterday;
+    private Button btnFilterMonth;
+    private Button btnFilterAll;
     private TextView tvDateRangeLabel;
+
     private LinearLayout llEmptyState;
     private LinearLayout llTransactionsList;
 
@@ -67,7 +65,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Verify License Security
+        // Security License Verification
         if (!LicenseManager.isLicenseActive(this)) {
             redirectToActivation();
             return;
@@ -76,7 +74,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         initViews();
-        setupFilterSpinner();
+        setupFilterTabs();
         setupClickListeners();
         checkPermissions();
 
@@ -98,11 +96,12 @@ public class MainActivity extends Activity {
         tvOutflowCount = findViewById(R.id.tvOutflowCount);
         btnShareSummary = findViewById(R.id.btnShareSummary);
 
-        btnCashIn = findViewById(R.id.btnCashIn);
-        btnCashOut = findViewById(R.id.btnCashOut);
-
-        spDateFilter = findViewById(R.id.spDateFilter);
+        btnFilterToday = findViewById(R.id.btnFilterToday);
+        btnFilterYesterday = findViewById(R.id.btnFilterYesterday);
+        btnFilterMonth = findViewById(R.id.btnFilterMonth);
+        btnFilterAll = findViewById(R.id.btnFilterAll);
         tvDateRangeLabel = findViewById(R.id.tvDateRangeLabel);
+
         llEmptyState = findViewById(R.id.llEmptyState);
         llTransactionsList = findViewById(R.id.llTransactionsList);
 
@@ -139,27 +138,37 @@ public class MainActivity extends Activity {
             Toast.makeText(this, "Enable 'Rizzle Merchant' in Notification Access", Toast.LENGTH_LONG).show();
         });
 
-        btnCashOut.setOnClickListener(v -> showCashOutDialog());
-        btnCashIn.setOnClickListener(v -> showCashInDialog());
-
         btnShareSummary.setOnClickListener(v -> shareReportViaWhatsApp());
     }
 
-    private void setupFilterSpinner() {
-        String[] options = {"Today", "Yesterday", "This Month", "All Time"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, options);
-        spDateFilter.setAdapter(adapter);
+    private void setupFilterTabs() {
+        btnFilterToday.setOnClickListener(v -> selectFilterTab(0));
+        btnFilterYesterday.setOnClickListener(v -> selectFilterTab(1));
+        btnFilterMonth.setOnClickListener(v -> selectFilterTab(2));
+        btnFilterAll.setOnClickListener(v -> selectFilterTab(3));
 
-        spDateFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedFilterIndex = position;
-                loadKhataData();
+        updateTabButtonStyles();
+    }
+
+    private void selectFilterTab(int index) {
+        selectedFilterIndex = index;
+        updateTabButtonStyles();
+        loadKhataData();
+    }
+
+    private void updateTabButtonStyles() {
+        Button[] tabs = {btnFilterToday, btnFilterYesterday, btnFilterMonth, btnFilterAll};
+        for (int i = 0; i < tabs.length; i++) {
+            if (i == selectedFilterIndex) {
+                tabs[i].setBackground(ContextCompat.getDrawable(this, R.drawable.tab_selected));
+                tabs[i].setTextColor(Color.WHITE);
+                tabs[i].setTypeface(null, Typeface.BOLD);
+            } else {
+                tabs[i].setBackground(ContextCompat.getDrawable(this, R.drawable.tab_unselected));
+                tabs[i].setTextColor(Color.parseColor("#94A3B8"));
+                tabs[i].setTypeface(null, Typeface.NORMAL);
             }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
+        }
     }
 
     @Override
@@ -232,7 +241,7 @@ public class MainActivity extends Activity {
         if (stats.netBalance >= 0) {
             tvNetBalance.setTextColor(Color.WHITE);
         } else {
-            tvNetBalance.setTextColor(Color.parseColor("#F43F5E"));
+            tvNetBalance.setTextColor(Color.parseColor("#FDA4AF"));
         }
 
         tvInflowTotal.setText("Rs. " + intCurrencyFmt.format(stats.totalInflow));
@@ -241,7 +250,7 @@ public class MainActivity extends Activity {
         tvOutflowTotal.setText("Rs. " + intCurrencyFmt.format(stats.totalOutflow));
         tvOutflowCount.setText(stats.outflowCount + " transfers");
 
-        // 2. Fetch Transactions
+        // 2. Fetch Transactions Feed
         List<DatabaseHelper.TransactionItem> transactions = db.getTransactions(startDate, endDate, "all");
         llTransactionsList.removeAllViews();
 
@@ -262,16 +271,13 @@ public class MainActivity extends Activity {
                 TextView tvTxTime = itemView.findViewById(R.id.tvTxTime);
 
                 // Channel Badge Styling
-                String channel = tx.channel != null ? tx.channel.toLowerCase() : "manual";
-                if (channel.contains("jazzcash")) {
-                    tvTxChannel.setText("JAZZCASH");
-                    tvTxChannel.setBackgroundColor(Color.parseColor("#ED1C24"));
-                } else if (channel.contains("easypaisa")) {
+                String channel = tx.channel != null ? tx.channel.toLowerCase() : "jazzcash";
+                if (channel.contains("easypaisa")) {
                     tvTxChannel.setText("EASYPAISA");
                     tvTxChannel.setBackgroundColor(Color.parseColor("#00A651"));
                 } else {
-                    tvTxChannel.setText("MANUAL CASH");
-                    tvTxChannel.setBackgroundColor(Color.parseColor("#2563EB"));
+                    tvTxChannel.setText("JAZZCASH");
+                    tvTxChannel.setBackgroundColor(Color.parseColor("#ED1C24"));
                 }
 
                 // Amount & Inflow/Outflow styling
@@ -283,10 +289,10 @@ public class MainActivity extends Activity {
                 } else {
                     tvTxAmount.setText("- Rs. " + currencyFmt.format(tx.amount));
                     tvTxAmount.setTextColor(Color.parseColor("#F43F5E"));
-                    tvTxParty.setText("Sent To: " + (tx.recipient != null && !tx.recipient.isEmpty() ? tx.recipient : "Vendor"));
+                    tvTxParty.setText("Sent To: " + (tx.recipient != null && !tx.recipient.isEmpty() ? tx.recipient : "Recipient"));
                 }
 
-                tvTxPurpose.setText(tx.purpose != null && !tx.purpose.isEmpty() ? tx.purpose : "General");
+                tvTxPurpose.setText(tx.purpose != null && !tx.purpose.isEmpty() ? tx.purpose : "Payment");
                 tvTxId.setText("TID: " + (tx.trxId != null ? tx.trxId : "N/A"));
                 tvTxTime.setText(tx.createdAt != null ? tx.createdAt : "");
 
@@ -340,129 +346,6 @@ public class MainActivity extends Activity {
         return new String[]{start, end, label};
     }
 
-    // CASH OUT / WITHDRAWAL MODAL
-    private void showCashOutDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_cash_out, null);
-        builder.setView(dialogView);
-
-        AlertDialog dialog = builder.create();
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
-
-        EditText etAmount = dialogView.findViewById(R.id.etOutAmount);
-        EditText etSender = dialogView.findViewById(R.id.etOutSender);
-        EditText etRecipient = dialogView.findViewById(R.id.etOutRecipient);
-        EditText etPurpose = dialogView.findViewById(R.id.etOutPurpose);
-        Button btnCancel = dialogView.findViewById(R.id.btnOutCancel);
-        Button btnConfirm = dialogView.findViewById(R.id.btnOutConfirm);
-
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-
-        btnConfirm.setOnClickListener(v -> {
-            String amountStr = etAmount.getText().toString().trim();
-            String sender = etSender.getText().toString().trim();
-            String recipient = etRecipient.getText().toString().trim();
-            String purpose = etPurpose.getText().toString().trim();
-
-            if (amountStr.isEmpty()) {
-                etAmount.setError("Enter amount");
-                return;
-            }
-
-            double amount;
-            try {
-                amount = Double.parseDouble(amountStr);
-                if (amount <= 0) throw new NumberFormatException();
-            } catch (Exception e) {
-                etAmount.setError("Invalid amount");
-                return;
-            }
-
-            if (recipient.isEmpty()) {
-                etRecipient.setError("Enter recipient name / detail");
-                return;
-            }
-
-            if (sender.isEmpty()) sender = "Shop Owner";
-            if (purpose.isEmpty()) purpose = "Cash Out";
-
-            String trxId = "OUT_" + System.currentTimeMillis();
-            boolean ok = DatabaseHelper.getInstance(this).insertTransaction(
-                    trxId, amount, "outflow", "manual", sender, recipient, purpose
-            );
-
-            if (ok) {
-                Toast.makeText(this, "Cash Out recorded successfully: Rs. " + amount, Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
-                loadKhataData();
-            } else {
-                Toast.makeText(this, "Failed to record entry", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        dialog.show();
-    }
-
-    // CASH IN MODAL
-    private void showCashInDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_cash_in, null);
-        builder.setView(dialogView);
-
-        AlertDialog dialog = builder.create();
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
-
-        EditText etAmount = dialogView.findViewById(R.id.etInAmount);
-        EditText etSender = dialogView.findViewById(R.id.etInSender);
-        EditText etPurpose = dialogView.findViewById(R.id.etInPurpose);
-        Button btnCancel = dialogView.findViewById(R.id.btnInCancel);
-        Button btnConfirm = dialogView.findViewById(R.id.btnInConfirm);
-
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-
-        btnConfirm.setOnClickListener(v -> {
-            String amountStr = etAmount.getText().toString().trim();
-            String sender = etSender.getText().toString().trim();
-            String purpose = etPurpose.getText().toString().trim();
-
-            if (amountStr.isEmpty()) {
-                etAmount.setError("Enter amount");
-                return;
-            }
-
-            double amount;
-            try {
-                amount = Double.parseDouble(amountStr);
-                if (amount <= 0) throw new NumberFormatException();
-            } catch (Exception e) {
-                etAmount.setError("Invalid amount");
-                return;
-            }
-
-            if (sender.isEmpty()) sender = "Counter Sale";
-            if (purpose.isEmpty()) purpose = "Direct Payment";
-
-            String trxId = "IN_" + System.currentTimeMillis();
-            boolean ok = DatabaseHelper.getInstance(this).insertTransaction(
-                    trxId, amount, "inflow", "manual", sender, "Shop", purpose
-            );
-
-            if (ok) {
-                Toast.makeText(this, "Cash In added successfully: Rs. " + amount, Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
-                loadKhataData();
-            } else {
-                Toast.makeText(this, "Failed to record entry", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        dialog.show();
-    }
-
     private void shareReportViaWhatsApp() {
         String[] dateRange = computeDateRange(selectedFilterIndex);
         DatabaseHelper.KhataStats stats = DatabaseHelper.getInstance(this).getStats(dateRange[0], dateRange[1]);
@@ -485,7 +368,6 @@ public class MainActivity extends Activity {
         try {
             startActivity(sendIntent);
         } catch (Exception e) {
-            // If direct WhatsApp package not installed or fails, open generic chooser
             Intent chooser = Intent.createChooser(sendIntent, "Share Khata Report via");
             startActivity(chooser);
         }
