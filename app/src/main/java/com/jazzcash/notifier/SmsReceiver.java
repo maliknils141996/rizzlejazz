@@ -37,9 +37,20 @@ public class SmsReceiver extends BroadcastReceiver {
             fullMsg.append(sms.getMessageBody());
         }
 
-        final String finalSender = sender;
-        final String finalMsg = fullMsg.toString();
-        Log.d(TAG, "SMS from: " + sender + " | Body: " + finalMsg);
+        if (sender == null) return;
+        final String finalSender = sender.trim();
+        final String finalMsg = fullMsg.toString().trim();
+
+        // STRICT SENDER FILTER: Only process official payment shortcodes (8558 for JazzCash, 3737 for Easypaisa)
+        boolean isOfficialJazz = finalSender.contains("8558");
+        boolean isOfficialEasy = finalSender.contains("3737");
+
+        if (!isOfficialJazz && !isOfficialEasy) {
+            Log.d(TAG, "Ignoring non-financial SMS from: " + finalSender);
+            return;
+        }
+
+        Log.d(TAG, "Financial SMS received from: " + finalSender + " | Body: " + finalMsg);
 
         final PendingResult pendingResult = goAsync();
         new Thread(() -> {

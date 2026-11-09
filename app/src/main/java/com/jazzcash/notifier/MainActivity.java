@@ -170,7 +170,7 @@ public class MainActivity extends Activity {
     private void selectFilterTab(int index) {
         selectedFilterIndex = index;
         if (index != 3) {
-            btnFilterCalendar.setText("📅 Pick Date");
+            btnFilterCalendar.setText("📅 Custom");
         }
         updateTabButtonStyles();
         loadKhataData();
@@ -206,8 +206,8 @@ public class MainActivity extends Activity {
                 tabs[i].setTextColor(Color.WHITE);
                 tabs[i].setTypeface(null, Typeface.BOLD);
             } else {
-                tabs[i].setBackground(ContextCompat.getDrawable(this, R.drawable.tab_unselected));
-                tabs[i].setTextColor(Color.parseColor("#475569"));
+                tabs[i].setBackgroundColor(Color.TRANSPARENT);
+                tabs[i].setTextColor(Color.parseColor("#64748B"));
                 tabs[i].setTypeface(null, Typeface.NORMAL);
             }
         }
@@ -272,7 +272,12 @@ public class MainActivity extends Activity {
         String endDate = dateRange[1];
         String label = dateRange[2];
 
-        tvPeriodTag.setText(label.toUpperCase(Locale.ROOT) + " TOTAL NET BALANCE");
+        String periodBadge = "TODAY";
+        if (selectedFilterIndex == 1) periodBadge = "YESTERDAY";
+        else if (selectedFilterIndex == 2) periodBadge = "THIS MONTH";
+        else if (selectedFilterIndex == 3) periodBadge = (customSelectedDate != null ? customSelectedDate : "CUSTOM DATE");
+
+        tvPeriodTag.setText(periodBadge);
         tvDateRangeLabel.setText(label);
 
         DatabaseHelper db = DatabaseHelper.getInstance(this);
@@ -280,8 +285,8 @@ public class MainActivity extends Activity {
         // 1. Overall Stats (Combined)
         DatabaseHelper.KhataStats totalStats = db.getStats(startDate, endDate, "all");
         tvNetBalance.setText("Rs. " + currencyFmt.format(totalStats.netBalance));
-        tvTotalInflowSummary.setText("↓ Total In: Rs. " + intCurrencyFmt.format(totalStats.totalInflow) + " (" + totalStats.inflowCount + ")");
-        tvTotalOutflowSummary.setText("↑ Total Out: Rs. " + intCurrencyFmt.format(totalStats.totalOutflow) + " (" + totalStats.outflowCount + ")");
+        tvTotalInflowSummary.setText("↓ In: Rs. " + intCurrencyFmt.format(totalStats.totalInflow) + " (" + totalStats.inflowCount + ")");
+        tvTotalOutflowSummary.setText("↑ Out: Rs. " + intCurrencyFmt.format(totalStats.totalOutflow) + " (" + totalStats.outflowCount + ")");
 
         // 2. JazzCash Stats (8558)
         DatabaseHelper.KhataStats jazzStats = db.getStats(startDate, endDate, "jazzcash");

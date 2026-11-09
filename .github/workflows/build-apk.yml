@@ -47,17 +47,16 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v2.2.0-${{ github.run_number }}
-        name: PayVox v2.2 - Smart Soundbox & Dual Khata
+        tag_name: v2.3.0-${{ github.run_number }}
+        name: PayVox v2.3 - Fixed Channel Audio & Sophisticated UI
         body: |
-          ### 💜 PayVox v2.2 - Dual Soundbox & Khata (Bright White & Purple UI)
+          ### 💜 PayVox v2.3 - Final Production Build
 
-          ✅ **Key Fixes & Features:**
-          - 🎯 **Fixed Single-Channel Audio Speech:** JazzCash (8558) speaks strictly JazzCash; Easypaisa (3737) speaks strictly Easypaisa. Zero cross-talk or double announcement.
-          - 📒 **Two Separate Ledgers (Dual Khata):** Dedicated JazzCash Khata Card + Dedicated Easypaisa Khata Card + Total Combined Net Balance!
-          - 📅 **Interactive Calendar Date Picker:** Pick any custom date on the calendar to view its transactions.
-          - 🎨 **Bright White & Royal Purple UI:** Clean off-white background with modern royal purple cards and high contrast typography.
-          - 🛡️ **Anti-Spam Filter & Deduplication:** Till QR cashback/bonus spam is blocked.
+          ✅ **Key Fixes:**
+          - 🎯 **Fixed False Trigger & Double Announcement:** Strict 8558/3737 shortcode verification and outbound notification suppression. JazzCash speaks strictly on JazzCash payment; Easypaisa speaks strictly on Easypaisa payment.
+          - 📒 **Dual Khata System:** JazzCash Khata and Easypaisa Khata are completely segregated with independent Net Balances.
+          - 📅 **Sophisticated Segmented Filter:** Compact, responsive `Today` | `Yesterday` | `This Month` | `📅 Custom` date picker that fits on all phone screens without cutting off.
+          - 🎨 **Executive Bright White UI:** Clean off-white background, luxury royal purple balance card, and crisp typography.
           
           **Direct Download:** Click `PayVox.apk` below to download and install.
         draft: false

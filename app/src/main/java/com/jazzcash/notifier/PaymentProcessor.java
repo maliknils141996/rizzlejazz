@@ -41,7 +41,7 @@ public class PaymentProcessor {
         // 2. STRICT CHANNEL IDENTIFICATION
         String channel = null;
 
-        // Priority A: Sender Number (8558 vs 3737)
+        // Primary: Sender check (8558 = JazzCash, 3737 = Easypaisa)
         if (lowerSender.contains("8558")) {
             channel = "jazzcash";
         } else if (lowerSender.contains("3737")) {
@@ -52,7 +52,7 @@ public class PaymentProcessor {
             channel = "easypaisa";
         }
 
-        // Priority B: If sender is generic, inspect message body carefully
+        // Secondary fallback only if sender was generic
         if (channel == null) {
             boolean mentionsJazz = lowerMsg.contains("jazzcash") || lowerMsg.contains("till id");
             boolean mentionsEasy = lowerMsg.contains("easypaisa");
@@ -62,36 +62,52 @@ public class PaymentProcessor {
             } else if (mentionsEasy && !mentionsJazz) {
                 channel = "easypaisa";
             } else if (mentionsJazz && mentionsEasy) {
-                // If promotional text mentions both, determine primary context
-                if (lowerMsg.startsWith("thank you") || lowerMsg.contains("till id") || lowerMsg.contains("jazzcash account")) {
+                // If promotional text at bottom mentions Easypaisa on a JazzCash SMS
+                if (lowerMsg.startsWith("thank you") || lowerMsg.contains("till id") || lowerMsg.contains("8558")) {
                     channel = "jazzcash";
-                } else if (lowerMsg.contains("easypaisa account")) {
+                } else {
                     channel = "easypaisa";
                 }
             }
         }
 
-        // If not JazzCash or Easypaisa, ignore
         if (channel == null) {
-            Log.d(TAG, "Not a recognized JazzCash or Easypaisa alert. Ignoring.");
+            Log.d(TAG, "Channel unidentified. Ignoring: " + message);
             return;
         }
 
-        // 3. Identify Type (Inflow vs Outflow)
-        boolean isOutflow = lowerMsg.contains("transferred rs") ||
-                            lowerMsg.contains("transferred to") ||
-                            lowerMsg.contains("transferred of") ||
-                            lowerMsg.contains("sent rs") ||
+        // 3. IDENTIFY TRANSACTION TYPE (INFLOW VS OUTFLOW)
+        boolean isOutflow = lowerMsg.contains("transferred") ||
                             lowerMsg.contains("you have sent") ||
-                            lowerMsg.contains("paid rs") ||
+                            lowerMsg.contains("sent rs") ||
                             lowerMsg.contains("paid to") ||
-                            (lowerMsg.contains("payment of rs") && lowerMsg.contains("made to")) ||
+                            lowerMsg.contains("paid rs") ||
+                            lowerMsg.contains("payment to") ||
+                            (lowerMsg.contains("payment of rs") && (lowerMsg.contains(" to ") || lowerMsg.contains("successful"))) ||
                             lowerMsg.contains("cash withdrawal") ||
                             lowerMsg.contains("withdrawn rs") ||
-                            lowerMsg.contains("debited with") ||
-                            lowerMsg.contains("has been debited");
+                            lowerMsg.contains("debited");
 
-        String type = isOutflow ? "outflow" : "inflow";
+        boolean isInflow = lowerMsg.contains("received rs") ||
+                           lowerMsg.contains("has received") ||
+                           lowerMsg.contains("you have received") ||
+                           lowerMsg.contains("payment received") ||
+                           lowerMsg.contains("has sent you") ||
+                           lowerMsg.contains("credited with") ||
+                           (lowerMsg.contains("thank you! payment of rs") && lowerMsg.contains("received")) ||
+                           (lowerMsg.contains("payment of rs") && lowerMsg.contains("received"));
+
+        // If it matches outflow keywords, it is strictly OUTFLOW
+        String type;
+        if (isOutflow) {
+            type = "outflow";
+        } else if (isInflow) {
+            type = "inflow";
+        } else {
+            // Not a clear payment transaction (could be balance check, promo, etc.)
+            Log.d(TAG, "Message neither explicit inflow nor outflow. Ignoring: " + message);
+            return;
+        }
 
         // 4. Extract Amount
         double amount = extractAmount(message);
@@ -114,14 +130,12 @@ public class PaymentProcessor {
             return;
         }
 
-        // Also check if general key was seen within 3 seconds (SMS + notification collision)
         Long lastSeenGeneral = processedAlertsCache.get(dedupKeyGeneral);
         if (lastSeenGeneral != null && (now - lastSeenGeneral) < 5000) {
             Log.d(TAG, "Duplicate alert detected (within 5s). Skipping: " + dedupKeyGeneral);
             return;
         }
 
-        // Register in cache
         processedAlertsCache.put(dedupKeyWithTrx, now);
         processedAlertsCache.put(dedupKeyGeneral, now);
 
@@ -142,12 +156,13 @@ public class PaymentProcessor {
         if (inserted) {
             Log.d(TAG, "Recorded " + type + " of Rs. " + amount + " on " + channel + " (TID: " + trxId + ")");
 
-            // 9. Voice Announcement ONLY for Inflow (+) on the SPECIFIC channel
+            // 9. Voice Announcement ONLY for INFLOW (+) on this exact channel!
+            // Outflows are SILENT (they only update Khata).
             if ("inflow".equalsIgnoreCase(type)) {
                 VoiceEngine.getInstance(context).speakPayment(channel, amount);
             }
 
-            // 10. Notify MainActivity to update UI Net Balance & Khata live
+            // 10. Live refresh MainActivity
             Intent refreshIntent = new Intent("com.rizzleshop.ACTION_REFRESH_KHATA");
             context.sendBroadcast(refreshIntent);
         }
@@ -215,6 +230,6 @@ public class PaymentProcessor {
         } catch (Exception e) {
             // ignore
         }
-        return isOutflow ? "Transfer / Outflow" : "Customer";
+        return isOutflow ? "Vendor / Recipient" : "Customer";
     }
 }
