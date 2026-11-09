@@ -323,10 +323,10 @@ public class MainActivity extends Activity {
                 // Channel Badge Styling
                 String channel = tx.channel != null ? tx.channel.toLowerCase() : "jazzcash";
                 if (channel.contains("easypaisa")) {
-                    tvTxChannel.setText("EASYPAISA • 3737");
+                    tvTxChannel.setText("EASYPAISA");
                     tvTxChannel.setBackgroundColor(Color.parseColor("#00A651"));
                 } else {
-                    tvTxChannel.setText("JAZZCASH • 8558");
+                    tvTxChannel.setText("JAZZCASH");
                     tvTxChannel.setBackgroundColor(Color.parseColor("#ED1C24"));
                 }
 
@@ -414,12 +414,12 @@ public class MainActivity extends Activity {
         String report = "📊 *PayVox - Khata Summary*\n"
                 + "📅 *Period:* " + dateRange[2] + "\n"
                 + "------------------------------------\n"
-                + "🔴 *JazzCash (8558):*\n"
+                + "🔴 *JazzCash:*\n"
                 + "   ↓ In: Rs. " + currencyFmt.format(jazzStats.totalInflow) + "\n"
                 + "   ↑ Out: Rs. " + currencyFmt.format(jazzStats.totalOutflow) + "\n"
                 + "   💰 Net: Rs. " + currencyFmt.format(jazzStats.netBalance) + "\n"
                 + "------------------------------------\n"
-                + "🟢 *Easypaisa (3737):*\n"
+                + "🟢 *Easypaisa:*\n"
                 + "   ↓ In: Rs. " + currencyFmt.format(easyStats.totalInflow) + "\n"
                 + "   ↑ Out: Rs. " + currencyFmt.format(easyStats.totalOutflow) + "\n"
                 + "   💰 Net: Rs. " + currencyFmt.format(easyStats.netBalance) + "\n"

@@ -320,14 +320,6 @@
                         android:paddingHorizontal="6dp"
                         android:paddingVertical="2dp"
                         android:background="#ED1C24" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="8558"
-                        android:textColor="#64748B"
-                        android:textSize="9sp"
-                        android:layout_marginStart="4dp" />
                 </LinearLayout>
 
                 <TextView
@@ -386,14 +378,6 @@
                         android:paddingHorizontal="6dp"
                         android:paddingVertical="2dp"
                         android:background="#00A651" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="3737"
-                        android:textColor="#64748B"
-                        android:textSize="9sp"
-                        android:layout_marginStart="4dp" />
                 </LinearLayout>
 
                 <TextView
@@ -480,7 +464,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Incoming JazzCash (8558) and Easypaisa (3737) payments will appear here."
+                android:text="Incoming JazzCash and Easypaisa payments will appear here."
                 android:textColor="#94A3B8"
                 android:textSize="11sp"
                 android:gravity="center"
