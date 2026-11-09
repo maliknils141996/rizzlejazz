@@ -1,6 +1,8 @@
 package com.jazzcash.notifier;
 
 import android.app.Notification;
+import android.content.ComponentName;
+import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -8,6 +10,23 @@ import android.util.Log;
 
 public class PaymentNotificationListener extends NotificationListenerService {
     private static final String TAG = "PaymentNotification";
+
+    @Override
+    public void onListenerConnected() {
+        super.onListenerConnected();
+        Log.d(TAG, "PayVox PaymentNotificationListener CONNECTED successfully!");
+    }
+
+    @Override
+    public void onListenerDisconnected() {
+        super.onListenerDisconnected();
+        Log.w(TAG, "PayVox PaymentNotificationListener DISCONNECTED! Attempting rebind...");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            try {
+                requestRebind(new ComponentName(this, PaymentNotificationListener.class));
+            } catch (Exception ignored) {}
+        }
+    }
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {

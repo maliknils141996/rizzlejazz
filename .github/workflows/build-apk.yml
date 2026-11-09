@@ -47,16 +47,15 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v2.5.2-${{ github.run_number }}
-        name: PayVox v2.5.2 - 1-Click In-App Permission Dialogs
+        tag_name: v2.5.3-${{ github.run_number }}
+        name: PayVox v2.5.3 - Direct Notification Access Recovery & Test Voice Button
         body: |
-          ### 💜 PayVox v2.5.2 - Instant On-Screen Permission Allow
+          ### 💜 PayVox v2.5.3 - Notification Access & Instant Voice Test
 
           ✅ **Key Upgrades:**
-          - ⚡ **1-Click On-Screen "Allow" Dialogs:** No need to ever open phone settings! PayVox directly triggers the native on-screen Android "Allow / Don't Allow" popups for SMS & Sound permissions.
-          - 📱 **Interactive In-App Button:** Added a prominent `[⚡ Allow Permissions (الاؤ کریں)]` button inside the app that pops up the permission dialog instantly on tap.
-          - 🚫 **Zero Settings Needed for Offline Mode:** Offline SMS soundbox works immediately once Allowed on screen; no deep phone settings navigation required!
-          - 🎨 **Cleaner Merchant Interface:** Clean badges for JazzCash and Easypaisa.
+          - 🔔 **Notification Access Recovery (No-SIM / Wi-Fi Support):** Fixed issue where devices without SIM stopped announcing because Notification Access was unbound. Now automatically requests rebind and provides a 1-click settings button if not yet enabled!
+          - 📢 **Instant "Test Voice" Button:** Added a prominent green `[📢 Test Voice]` button on the top-right so merchants can tap and test their speaker & soundbox voice anytime.
+          - ⚡ **Dual Smart Permissions:** Auto-detects whether device needs SMS permission (on-screen Allow popup) or Notification Access (direct settings shortcut).
 
           **Direct Download:** Click `PayVox.apk` below to download and install.
         draft: false

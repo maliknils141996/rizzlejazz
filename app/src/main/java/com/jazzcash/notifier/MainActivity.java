@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -35,7 +36,10 @@ public class MainActivity extends Activity {
 
     private TextView tvLicenseBadge;
     private Button btnSoundToggle;
+    private Button btnTestVoice;
     private LinearLayout llNotifBanner;
+    private TextView tvBannerTitle;
+    private TextView tvBannerSubtitle;
     private Button btnEnableNotif;
 
     // Top Total Hero Card
@@ -96,7 +100,10 @@ public class MainActivity extends Activity {
     private void initViews() {
         tvLicenseBadge = findViewById(R.id.tvLicenseBadge);
         btnSoundToggle = findViewById(R.id.btnSoundToggle);
+        btnTestVoice = findViewById(R.id.btnTestVoice);
         llNotifBanner = findViewById(R.id.llNotifBanner);
+        tvBannerTitle = findViewById(R.id.tvBannerTitle);
+        tvBannerSubtitle = findViewById(R.id.tvBannerSubtitle);
         btnEnableNotif = findViewById(R.id.btnEnableNotif);
 
         tvPeriodTag = findViewById(R.id.tvPeriodTag);
@@ -143,6 +150,11 @@ public class MainActivity extends Activity {
     }
 
     private void setupClickListeners() {
+        btnTestVoice.setOnClickListener(v -> {
+            VoiceEngine.getInstance(this).speak("PayVox soundbox bilkul theek kaam kar raha hai");
+            Toast.makeText(this, "📢 Testing Soundbox Voice...", Toast.LENGTH_SHORT).show();
+        });
+
         btnSoundToggle.setOnClickListener(v -> {
             boolean current = VoiceEngine.getInstance(this).isSoundEnabled();
             VoiceEngine.getInstance(this).setSoundEnabled(!current);
@@ -223,6 +235,14 @@ public class MainActivity extends Activity {
         updatePermissionBanner();
         loadKhataData();
 
+        // Ensure Notification Listener is actively connected
+        boolean notifAccess = NotificationManagerCompat.getEnabledListenerPackages(this).contains(getPackageName());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && notifAccess) {
+            try {
+                PaymentNotificationListener.requestRebind(new ComponentName(this, PaymentNotificationListener.class));
+            } catch (Exception ignored) {}
+        }
+
         // Register Live Refresh Receiver
         refreshReceiver = new BroadcastReceiver() {
             @Override
@@ -249,8 +269,36 @@ public class MainActivity extends Activity {
     }
 
     private void updatePermissionBanner() {
-        boolean hasPerms = PermissionHelper.hasAllRequiredPermissions(this);
-        llNotifBanner.setVisibility(hasPerms ? View.GONE : View.VISIBLE);
+        boolean runtimePerms = PermissionHelper.hasAllRequiredPermissions(this);
+        boolean notifAccess = NotificationManagerCompat.getEnabledListenerPackages(this).contains(getPackageName());
+
+        if (!runtimePerms) {
+            llNotifBanner.setVisibility(View.VISIBLE);
+            if (tvBannerTitle != null) tvBannerTitle.setText("⚠️ SMS & Voice Permission Required");
+            if (tvBannerSubtitle != null) tvBannerSubtitle.setText("Click Allow to enable payment voice announcements.");
+            if (btnEnableNotif != null) {
+                btnEnableNotif.setText("⚡ Allow Permissions (الاؤ کریں)");
+                btnEnableNotif.setOnClickListener(v -> PermissionHelper.requestAppPermissions(this));
+            }
+        } else if (!notifAccess) {
+            // Runtime perms are granted, but Notification Access is off (CRITICAL for phones without SIM!)
+            llNotifBanner.setVisibility(View.VISIBLE);
+            if (tvBannerTitle != null) tvBannerTitle.setText("🔔 Notification Access Needed (بغیر سم کے لیے)");
+            if (tvBannerSubtitle != null) tvBannerSubtitle.setText("جاز کیش اور ایزی پیسہ ایپ کے نوٹیفکیشن سننے کے لیے سیٹنگ میں PayVox کا بٹن آن کریں۔");
+            if (btnEnableNotif != null) {
+                btnEnableNotif.setText("⚙️ سیٹنگز کھولیں اور PayVox آن کریں");
+                btnEnableNotif.setOnClickListener(v -> {
+                    try {
+                        startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
+                        Toast.makeText(this, "PayVox ko dhoondh kar ON karein", Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        startActivity(new Intent(Settings.ACTION_SETTINGS));
+                    }
+                });
+            }
+        } else {
+            llNotifBanner.setVisibility(View.GONE);
+        }
     }
 
     private void checkPermissions() {
