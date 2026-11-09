@@ -1,9 +1,10 @@
 <resources>
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">#7C3AED</item>
-        <item name="colorPrimaryDark">#0F0C1B</item>
-        <item name="colorAccent">#A78BFA</item>
-        <item name="android:windowBackground">#0F0C1B</item>
-        <item name="android:statusBarColor">#0F0C1B</item>
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">#6D28D9</item>
+        <item name="colorPrimaryDark">#F8FAFC</item>
+        <item name="colorAccent">#6D28D9</item>
+        <item name="android:windowBackground">#F8FAFC</item>
+        <item name="android:statusBarColor">#F8FAFC</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

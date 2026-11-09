@@ -1,15 +1,15 @@
 <resources>
-    <color name="primary">#7C3AED</color>
+    <color name="primary">#6D28D9</color>
     <color name="primary_dark">#5B21B6</color>
-    <color name="accent">#A78BFA</color>
-    <color name="bg_dark">#0F0C1B</color>
-    <color name="card_bg">#1A152E</color>
-    <color name="card_border">#2E2550</color>
-    <color name="text_white">#FFFFFF</color>
-    <color name="text_muted">#C4B5FD</color>
-    <color name="inflow_green">#10B981</color>
-    <color name="outflow_rose">#F43F5E</color>
-    <color name="jazzcash_orange">#ED1C24</color>
+    <color name="accent">#8B5CF6</color>
+    <color name="bg_light">#F8FAFC</color>
+    <color name="card_white">#FFFFFF</color>
+    <color name="card_border">#E2E8F0</color>
+    <color name="text_dark">#0F172A</color>
+    <color name="text_muted">#64748B</color>
+    <color name="inflow_green">#059669</color>
+    <color name="outflow_rose">#E11D48</color>
+    <color name="jazzcash_red">#ED1C24</color>
     <color name="easypaisa_green">#00A651</color>
     <color name="whatsapp_green">#25D366</color>
 </resources>

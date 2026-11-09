@@ -3,6 +3,7 @@ package com.jazzcash.notifier;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.util.LruCache;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,13 +11,17 @@ import java.util.regex.Pattern;
 public class PaymentProcessor {
     private static final String TAG = "PaymentProcessor";
 
-    public static void processIncomingText(Context context, String sender, String message) {
+    // Deduplication cache: stores "channel_amount_trx" -> timestamp
+    // Prevents double-announcements when both SMS and Notification fire for the same payment
+    private static final LruCache<String, Long> processedAlertsCache = new LruCache<>(100);
+    private static final long DEDUP_WINDOW_MS = 15000; // 15 seconds window
+
+    public static synchronized void processIncomingText(Context context, String sender, String message) {
         if (message == null || message.trim().isEmpty()) return;
         String lowerMsg = message.toLowerCase();
+        String lowerSender = sender != null ? sender.toLowerCase() : "";
 
         // 1. FILTER OUT CASHBACK / BONUS / INCENTIVE SPAM
-        // When customer pays via QR/Till, JazzCash/Easypaisa sends a 2nd SMS for 1 or 2 Rs cashback.
-        // We MUST ignore it so it doesn't interrupt or override the real payment announcement!
         if (lowerMsg.contains("cashback") ||
             lowerMsg.contains("cash back") ||
             lowerMsg.contains("bonus") ||
@@ -33,15 +38,42 @@ public class PaymentProcessor {
             return;
         }
 
-        // 2. Identify Channel (JazzCash vs Easypaisa)
-        String channel = "jazzcash";
-        boolean isJazzCash = sender.contains("8558") || lowerMsg.contains("jazzcash") || lowerMsg.contains("till id");
-        boolean isEasypaisa = sender.contains("3737") || lowerMsg.contains("easypaisa") || lowerMsg.contains("telenor");
+        // 2. STRICT CHANNEL IDENTIFICATION
+        String channel = null;
 
-        if (isEasypaisa) {
+        // Priority A: Sender Number (8558 vs 3737)
+        if (lowerSender.contains("8558")) {
+            channel = "jazzcash";
+        } else if (lowerSender.contains("3737")) {
             channel = "easypaisa";
-        } else if (!isJazzCash && !lowerMsg.contains("received rs") && !lowerMsg.contains("transferred rs") && !lowerMsg.contains("payment of rs")) {
-            // Not a financial transaction message
+        } else if (lowerSender.contains("jazzcash") || lowerSender.contains("mobilink")) {
+            channel = "jazzcash";
+        } else if (lowerSender.contains("easypaisa") || lowerSender.contains("telenor")) {
+            channel = "easypaisa";
+        }
+
+        // Priority B: If sender is generic, inspect message body carefully
+        if (channel == null) {
+            boolean mentionsJazz = lowerMsg.contains("jazzcash") || lowerMsg.contains("till id");
+            boolean mentionsEasy = lowerMsg.contains("easypaisa");
+
+            if (mentionsJazz && !mentionsEasy) {
+                channel = "jazzcash";
+            } else if (mentionsEasy && !mentionsJazz) {
+                channel = "easypaisa";
+            } else if (mentionsJazz && mentionsEasy) {
+                // If promotional text mentions both, determine primary context
+                if (lowerMsg.startsWith("thank you") || lowerMsg.contains("till id") || lowerMsg.contains("jazzcash account")) {
+                    channel = "jazzcash";
+                } else if (lowerMsg.contains("easypaisa account")) {
+                    channel = "easypaisa";
+                }
+            }
+        }
+
+        // If not JazzCash or Easypaisa, ignore
+        if (channel == null) {
+            Log.d(TAG, "Not a recognized JazzCash or Easypaisa alert. Ignoring.");
             return;
         }
 
@@ -71,7 +103,29 @@ public class PaymentProcessor {
         // 5. Extract Trx ID
         String trxId = extractTrxId(message);
 
-        // 6. Extract Counterparty (Sender or Recipient)
+        // 6. DEDUPLICATION CHECK
+        long now = System.currentTimeMillis();
+        String dedupKeyWithTrx = channel + "_" + (long)amount + "_" + trxId;
+        String dedupKeyGeneral = channel + "_" + (long)amount;
+
+        Long lastSeenWithTrx = processedAlertsCache.get(dedupKeyWithTrx);
+        if (lastSeenWithTrx != null && (now - lastSeenWithTrx) < DEDUP_WINDOW_MS) {
+            Log.d(TAG, "Duplicate alert detected (with Trx ID). Skipping: " + dedupKeyWithTrx);
+            return;
+        }
+
+        // Also check if general key was seen within 3 seconds (SMS + notification collision)
+        Long lastSeenGeneral = processedAlertsCache.get(dedupKeyGeneral);
+        if (lastSeenGeneral != null && (now - lastSeenGeneral) < 5000) {
+            Log.d(TAG, "Duplicate alert detected (within 5s). Skipping: " + dedupKeyGeneral);
+            return;
+        }
+
+        // Register in cache
+        processedAlertsCache.put(dedupKeyWithTrx, now);
+        processedAlertsCache.put(dedupKeyGeneral, now);
+
+        // 7. Extract Counterparty
         String counterparty = extractCounterparty(message, isOutflow);
         if (counterparty.isEmpty()) {
             counterparty = isOutflow ? "Vendor / Recipient" : (channel.toUpperCase() + " Customer");
@@ -81,19 +135,19 @@ public class PaymentProcessor {
         String whoReceived = isOutflow ? counterparty : "Shop";
         String purpose = isOutflow ? (channel.toUpperCase() + " Outflow / Sent") : (channel.toUpperCase() + " Payment Received");
 
-        // 7. Save to Local SQLite Database
+        // 8. Save to Local SQLite Database
         DatabaseHelper db = DatabaseHelper.getInstance(context);
         boolean inserted = db.insertTransaction(trxId, amount, type, channel, whoSent, whoReceived, purpose);
 
         if (inserted) {
             Log.d(TAG, "Recorded " + type + " of Rs. " + amount + " on " + channel + " (TID: " + trxId + ")");
 
-            // 8. Voice Announcement ONLY for Inflow (+) payments from customers
+            // 9. Voice Announcement ONLY for Inflow (+) on the SPECIFIC channel
             if ("inflow".equalsIgnoreCase(type)) {
                 VoiceEngine.getInstance(context).speakPayment(channel, amount);
             }
 
-            // 9. Notify MainActivity to update UI Net Balance & Khata live
+            // 10. Notify MainActivity to update UI Net Balance & Khata live
             Intent refreshIntent = new Intent("com.rizzleshop.ACTION_REFRESH_KHATA");
             context.sendBroadcast(refreshIntent);
         }

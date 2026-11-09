@@ -47,19 +47,17 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v2.1.0-${{ github.run_number }}
-        name: PayVox v2.1 - Smart Soundbox & Khata
+        tag_name: v2.2.0-${{ github.run_number }}
+        name: PayVox v2.2 - Smart Soundbox & Dual Khata
         body: |
-          ### 💜 PayVox - Smart Soundbox & Khata (100% Offline)
+          ### 💜 PayVox v2.2 - Dual Soundbox & Khata (Bright White & Purple UI)
 
-          ✅ **Key Features:**
-          - 🎨 **New Royal Purple Theme & "P!" App Icon**
-          - 📢 **Dual Voice Soundbox:** Real-time Urdu announcements for **JazzCash** (`8558`) and **Easypaisa** (`3737`).
-          - 🛡️ **Smart Anti-Spam Filter:** Automatically filters out Till QR cashback/bonus/incentive spam so it never interrupts actual payment announcements.
-          - ⚡ **100% Automated Outflow & Inflow:** Incoming payments add to Net Balance; money sent/transferred out is automatically deducted from Net Balance without manual work.
-          - 🔐 **Device-Locked Cryptographic Licensing:** Offline HMAC-SHA256 security (1-Day Trial, Monthly, Yearly).
-          - 📒 **100% Offline SQLite Khata:** Built-in Ledger tracking Net Balance (`Inflow - Outflow`).
-          - 💬 **WhatsApp Khata Sharing:** 1-Click shareable daily/monthly ledger summaries.
+          ✅ **Key Fixes & Features:**
+          - 🎯 **Fixed Single-Channel Audio Speech:** JazzCash (8558) speaks strictly JazzCash; Easypaisa (3737) speaks strictly Easypaisa. Zero cross-talk or double announcement.
+          - 📒 **Two Separate Ledgers (Dual Khata):** Dedicated JazzCash Khata Card + Dedicated Easypaisa Khata Card + Total Combined Net Balance!
+          - 📅 **Interactive Calendar Date Picker:** Pick any custom date on the calendar to view its transactions.
+          - 🎨 **Bright White & Royal Purple UI:** Clean off-white background with modern royal purple cards and high contrast typography.
+          - 🛡️ **Anti-Spam Filter & Deduplication:** Till QR cashback/bonus spam is blocked.
           
           **Direct Download:** Click `PayVox.apk` below to download and install.
         draft: false

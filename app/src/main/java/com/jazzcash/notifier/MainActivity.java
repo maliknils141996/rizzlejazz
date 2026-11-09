@@ -2,6 +2,7 @@ package com.jazzcash.notifier;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -37,25 +38,35 @@ public class MainActivity extends Activity {
     private LinearLayout llNotifBanner;
     private Button btnEnableNotif;
 
+    // Top Total Hero Card
     private TextView tvPeriodTag;
     private TextView tvNetBalance;
-    private TextView tvInflowTotal;
-    private TextView tvInflowCount;
-    private TextView tvOutflowTotal;
-    private TextView tvOutflowCount;
+    private TextView tvTotalInflowSummary;
+    private TextView tvTotalOutflowSummary;
     private Button btnShareSummary;
 
-    // Filter Pill Tabs
+    // Dual Accounts (JazzCash & Easypaisa)
+    private TextView tvJazzNetBalance;
+    private TextView tvJazzInflow;
+    private TextView tvJazzOutflow;
+
+    private TextView tvEasyNetBalance;
+    private TextView tvEasyInflow;
+    private TextView tvEasyOutflow;
+
+    // Filter Buttons
     private Button btnFilterToday;
     private Button btnFilterYesterday;
     private Button btnFilterMonth;
-    private Button btnFilterAll;
+    private Button btnFilterCalendar;
     private TextView tvDateRangeLabel;
 
     private LinearLayout llEmptyState;
     private LinearLayout llTransactionsList;
 
-    private int selectedFilterIndex = 0; // 0=Today, 1=Yesterday, 2=This Month, 3=All Time
+    private int selectedFilterIndex = 0; // 0=Today, 1=Yesterday, 2=This Month, 3=Custom Calendar Date
+    private String customSelectedDate = null; // "yyyy-MM-dd"
+
     private final DecimalFormat currencyFmt = new DecimalFormat("#,##0.00");
     private final DecimalFormat intCurrencyFmt = new DecimalFormat("#,##0");
 
@@ -90,16 +101,22 @@ public class MainActivity extends Activity {
 
         tvPeriodTag = findViewById(R.id.tvPeriodTag);
         tvNetBalance = findViewById(R.id.tvNetBalance);
-        tvInflowTotal = findViewById(R.id.tvInflowTotal);
-        tvInflowCount = findViewById(R.id.tvInflowCount);
-        tvOutflowTotal = findViewById(R.id.tvOutflowTotal);
-        tvOutflowCount = findViewById(R.id.tvOutflowCount);
+        tvTotalInflowSummary = findViewById(R.id.tvTotalInflowSummary);
+        tvTotalOutflowSummary = findViewById(R.id.tvTotalOutflowSummary);
         btnShareSummary = findViewById(R.id.btnShareSummary);
+
+        tvJazzNetBalance = findViewById(R.id.tvJazzNetBalance);
+        tvJazzInflow = findViewById(R.id.tvJazzInflow);
+        tvJazzOutflow = findViewById(R.id.tvJazzOutflow);
+
+        tvEasyNetBalance = findViewById(R.id.tvEasyNetBalance);
+        tvEasyInflow = findViewById(R.id.tvEasyInflow);
+        tvEasyOutflow = findViewById(R.id.tvEasyOutflow);
 
         btnFilterToday = findViewById(R.id.btnFilterToday);
         btnFilterYesterday = findViewById(R.id.btnFilterYesterday);
         btnFilterMonth = findViewById(R.id.btnFilterMonth);
-        btnFilterAll = findViewById(R.id.btnFilterAll);
+        btnFilterCalendar = findViewById(R.id.btnFilterCalendar);
         tvDateRangeLabel = findViewById(R.id.tvDateRangeLabel);
 
         llEmptyState = findViewById(R.id.llEmptyState);
@@ -118,7 +135,7 @@ public class MainActivity extends Activity {
         boolean soundOn = VoiceEngine.getInstance(this).isSoundEnabled();
         if (soundOn) {
             btnSoundToggle.setText("🔊 Voice ON");
-            btnSoundToggle.setTextColor(Color.parseColor("#10B981"));
+            btnSoundToggle.setTextColor(Color.parseColor("#6D28D9"));
         } else {
             btnSoundToggle.setText("🔇 Voice OFF");
             btnSoundToggle.setTextColor(Color.parseColor("#94A3B8"));
@@ -135,7 +152,7 @@ public class MainActivity extends Activity {
 
         btnEnableNotif.setOnClickListener(v -> {
             startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
-            Toast.makeText(this, "Enable 'Rizzle Merchant' in Notification Access", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Enable 'PayVox' in Notification Access", Toast.LENGTH_LONG).show();
         });
 
         btnShareSummary.setOnClickListener(v -> shareReportViaWhatsApp());
@@ -145,19 +162,44 @@ public class MainActivity extends Activity {
         btnFilterToday.setOnClickListener(v -> selectFilterTab(0));
         btnFilterYesterday.setOnClickListener(v -> selectFilterTab(1));
         btnFilterMonth.setOnClickListener(v -> selectFilterTab(2));
-        btnFilterAll.setOnClickListener(v -> selectFilterTab(3));
+        btnFilterCalendar.setOnClickListener(v -> showDatePickerDialog());
 
         updateTabButtonStyles();
     }
 
     private void selectFilterTab(int index) {
         selectedFilterIndex = index;
+        if (index != 3) {
+            btnFilterCalendar.setText("📅 Pick Date");
+        }
         updateTabButtonStyles();
         loadKhataData();
     }
 
+    private void showDatePickerDialog() {
+        Calendar cal = Calendar.getInstance();
+        DatePickerDialog dialog = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+            cal.set(Calendar.YEAR, year);
+            cal.set(Calendar.MONTH, month);
+            cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+            SimpleDateFormat keyFmt = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            SimpleDateFormat displayFmt = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+
+            customSelectedDate = keyFmt.format(cal.getTime());
+            String displayStr = displayFmt.format(cal.getTime());
+
+            btnFilterCalendar.setText("📅 " + displayStr);
+            selectedFilterIndex = 3;
+            updateTabButtonStyles();
+            loadKhataData();
+        }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+
+        dialog.show();
+    }
+
     private void updateTabButtonStyles() {
-        Button[] tabs = {btnFilterToday, btnFilterYesterday, btnFilterMonth, btnFilterAll};
+        Button[] tabs = {btnFilterToday, btnFilterYesterday, btnFilterMonth, btnFilterCalendar};
         for (int i = 0; i < tabs.length; i++) {
             if (i == selectedFilterIndex) {
                 tabs[i].setBackground(ContextCompat.getDrawable(this, R.drawable.tab_selected));
@@ -165,7 +207,7 @@ public class MainActivity extends Activity {
                 tabs[i].setTypeface(null, Typeface.BOLD);
             } else {
                 tabs[i].setBackground(ContextCompat.getDrawable(this, R.drawable.tab_unselected));
-                tabs[i].setTextColor(Color.parseColor("#C4B5FD"));
+                tabs[i].setTextColor(Color.parseColor("#475569"));
                 tabs[i].setTypeface(null, Typeface.NORMAL);
             }
         }
@@ -230,27 +272,30 @@ public class MainActivity extends Activity {
         String endDate = dateRange[1];
         String label = dateRange[2];
 
-        tvPeriodTag.setText(label.toUpperCase(Locale.ROOT) + " NET BALANCE");
+        tvPeriodTag.setText(label.toUpperCase(Locale.ROOT) + " TOTAL NET BALANCE");
         tvDateRangeLabel.setText(label);
 
         DatabaseHelper db = DatabaseHelper.getInstance(this);
 
-        // 1. Fetch Stats
-        DatabaseHelper.KhataStats stats = db.getStats(startDate, endDate);
-        tvNetBalance.setText("Rs. " + currencyFmt.format(stats.netBalance));
-        if (stats.netBalance >= 0) {
-            tvNetBalance.setTextColor(Color.WHITE);
-        } else {
-            tvNetBalance.setTextColor(Color.parseColor("#FDA4AF"));
-        }
+        // 1. Overall Stats (Combined)
+        DatabaseHelper.KhataStats totalStats = db.getStats(startDate, endDate, "all");
+        tvNetBalance.setText("Rs. " + currencyFmt.format(totalStats.netBalance));
+        tvTotalInflowSummary.setText("↓ Total In: Rs. " + intCurrencyFmt.format(totalStats.totalInflow) + " (" + totalStats.inflowCount + ")");
+        tvTotalOutflowSummary.setText("↑ Total Out: Rs. " + intCurrencyFmt.format(totalStats.totalOutflow) + " (" + totalStats.outflowCount + ")");
 
-        tvInflowTotal.setText("Rs. " + intCurrencyFmt.format(stats.totalInflow));
-        tvInflowCount.setText(stats.inflowCount + " payments");
+        // 2. JazzCash Stats (8558)
+        DatabaseHelper.KhataStats jazzStats = db.getStats(startDate, endDate, "jazzcash");
+        tvJazzNetBalance.setText("Rs. " + currencyFmt.format(jazzStats.netBalance));
+        tvJazzInflow.setText("↓ In: Rs. " + intCurrencyFmt.format(jazzStats.totalInflow));
+        tvJazzOutflow.setText("↑ Out: Rs. " + intCurrencyFmt.format(jazzStats.totalOutflow));
 
-        tvOutflowTotal.setText("Rs. " + intCurrencyFmt.format(stats.totalOutflow));
-        tvOutflowCount.setText(stats.outflowCount + " transfers");
+        // 3. Easypaisa Stats (3737)
+        DatabaseHelper.KhataStats easyStats = db.getStats(startDate, endDate, "easypaisa");
+        tvEasyNetBalance.setText("Rs. " + currencyFmt.format(easyStats.netBalance));
+        tvEasyInflow.setText("↓ In: Rs. " + intCurrencyFmt.format(easyStats.totalInflow));
+        tvEasyOutflow.setText("↑ Out: Rs. " + intCurrencyFmt.format(easyStats.totalOutflow));
 
-        // 2. Fetch Transactions Feed
+        // 4. Live Transactions Feed (Showing both accounts together)
         List<DatabaseHelper.TransactionItem> transactions = db.getTransactions(startDate, endDate, "all");
         llTransactionsList.removeAllViews();
 
@@ -273,10 +318,10 @@ public class MainActivity extends Activity {
                 // Channel Badge Styling
                 String channel = tx.channel != null ? tx.channel.toLowerCase() : "jazzcash";
                 if (channel.contains("easypaisa")) {
-                    tvTxChannel.setText("EASYPAISA");
+                    tvTxChannel.setText("EASYPAISA • 3737");
                     tvTxChannel.setBackgroundColor(Color.parseColor("#00A651"));
                 } else {
-                    tvTxChannel.setText("JAZZCASH");
+                    tvTxChannel.setText("JAZZCASH • 8558");
                     tvTxChannel.setBackgroundColor(Color.parseColor("#ED1C24"));
                 }
 
@@ -284,11 +329,11 @@ public class MainActivity extends Activity {
                 boolean isInflow = "inflow".equalsIgnoreCase(tx.type);
                 if (isInflow) {
                     tvTxAmount.setText("+ Rs. " + currencyFmt.format(tx.amount));
-                    tvTxAmount.setTextColor(Color.parseColor("#10B981"));
+                    tvTxAmount.setTextColor(Color.parseColor("#059669"));
                     tvTxParty.setText("From: " + (tx.sender != null && !tx.sender.isEmpty() ? tx.sender : "Customer"));
                 } else {
                     tvTxAmount.setText("- Rs. " + currencyFmt.format(tx.amount));
-                    tvTxAmount.setTextColor(Color.parseColor("#F43F5E"));
+                    tvTxAmount.setTextColor(Color.parseColor("#E11D48"));
                     tvTxParty.setText("Sent To: " + (tx.recipient != null && !tx.recipient.isEmpty() ? tx.recipient : "Recipient"));
                 }
 
@@ -328,10 +373,17 @@ public class MainActivity extends Activity {
                 label = "This Month (" + new SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(new Date()) + ")";
                 break;
 
-            case 3: // All Time
-                start = "2020-01-01 00:00:00";
-                end = "2099-12-31 23:59:59";
-                label = "All Time History";
+            case 3: // Custom Date from Calendar
+                if (customSelectedDate != null) {
+                    start = customSelectedDate + " 00:00:00";
+                    end = customSelectedDate + " 23:59:59";
+                    label = "Date: " + customSelectedDate;
+                } else {
+                    String today = sdf.format(cal.getTime());
+                    start = today + " 00:00:00";
+                    end = today + " 23:59:59";
+                    label = "Today (" + today + ")";
+                }
                 break;
 
             case 0: // Today
@@ -348,16 +400,28 @@ public class MainActivity extends Activity {
 
     private void shareReportViaWhatsApp() {
         String[] dateRange = computeDateRange(selectedFilterIndex);
-        DatabaseHelper.KhataStats stats = DatabaseHelper.getInstance(this).getStats(dateRange[0], dateRange[1]);
+        DatabaseHelper db = DatabaseHelper.getInstance(this);
+
+        DatabaseHelper.KhataStats totalStats = db.getStats(dateRange[0], dateRange[1], "all");
+        DatabaseHelper.KhataStats jazzStats = db.getStats(dateRange[0], dateRange[1], "jazzcash");
+        DatabaseHelper.KhataStats easyStats = db.getStats(dateRange[0], dateRange[1], "easypaisa");
 
         String report = "📊 *PayVox - Khata Summary*\n"
                 + "📅 *Period:* " + dateRange[2] + "\n"
                 + "------------------------------------\n"
-                + "🟢 *Total Received:* Rs. " + currencyFmt.format(stats.totalInflow) + " (" + stats.inflowCount + " payments)\n"
-                + "🔴 *Total Sent/Out:* Rs. " + currencyFmt.format(stats.totalOutflow) + " (" + stats.outflowCount + " transfers)\n"
-                + "💰 *NET BALANCE:* Rs. " + currencyFmt.format(stats.netBalance) + "\n"
+                + "🔴 *JazzCash (8558):*\n"
+                + "   ↓ In: Rs. " + currencyFmt.format(jazzStats.totalInflow) + "\n"
+                + "   ↑ Out: Rs. " + currencyFmt.format(jazzStats.totalOutflow) + "\n"
+                + "   💰 Net: Rs. " + currencyFmt.format(jazzStats.netBalance) + "\n"
                 + "------------------------------------\n"
-                + "⚡ Generated by PayVox Soundbox (100% Offline)";
+                + "🟢 *Easypaisa (3737):*\n"
+                + "   ↓ In: Rs. " + currencyFmt.format(easyStats.totalInflow) + "\n"
+                + "   ↑ Out: Rs. " + currencyFmt.format(easyStats.totalOutflow) + "\n"
+                + "   💰 Net: Rs. " + currencyFmt.format(easyStats.netBalance) + "\n"
+                + "------------------------------------\n"
+                + "⭐ *TOTAL NET BALANCE: Rs. " + currencyFmt.format(totalStats.netBalance) + "*\n"
+                + "------------------------------------\n"
+                + "⚡ Generated by PayVox Smart Soundbox";
 
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);

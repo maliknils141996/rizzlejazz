@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#0F0C1B">
+    android:background="#F8FAFC">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,14 +18,14 @@
             android:layout_height="96dp"
             android:layout_marginTop="32dp"
             android:src="@drawable/app_logo"
-            android:elevation="8dp" />
+            android:elevation="6dp" />
 
         <!-- TITLE -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="PayVox"
-            android:textColor="#FFFFFF"
+            android:textColor="#0F172A"
             android:textSize="26sp"
             android:textStyle="bold"
             android:layout_marginTop="16dp" />
@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="JazzCash &amp; Easypaisa Soundbox Khata"
-            android:textColor="#C4B5FD"
+            android:textColor="#64748B"
             android:textSize="12sp"
             android:layout_marginTop="4dp" />
 
@@ -43,15 +43,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/card_bg"
+            android:background="@drawable/card_white"
             android:padding="18dp"
+            android:elevation="2dp"
             android:layout_marginTop="32dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="YOUR UNIQUE DEVICE ID:"
-                android:textColor="#A78BFA"
+                android:textColor="#6D28D9"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.08" />
@@ -69,7 +70,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="PV-XXXX-XXXX"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#0F172A"
                     android:textSize="18sp"
                     android:fontFamily="monospace"
                     android:textStyle="bold" />
@@ -82,7 +83,7 @@
                     android:textColor="#FFFFFF"
                     android:textSize="11sp"
                     android:textStyle="bold"
-                    android:backgroundTint="#7C3AED"
+                    android:backgroundTint="#6D28D9"
                     android:insetTop="0dp"
                     android:insetBottom="0dp" />
             </LinearLayout>
@@ -91,7 +92,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Share this Device ID with support to activate your license."
-                android:textColor="#64748B"
+                android:textColor="#94A3B8"
                 android:textSize="11sp"
                 android:layout_marginTop="6dp" />
         </LinearLayout>
@@ -101,15 +102,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/card_bg"
+            android:background="@drawable/card_white"
             android:padding="18dp"
+            android:elevation="2dp"
             android:layout_marginTop="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="ENTER LICENSE KEY"
-                android:textColor="#94A3B8"
+                android:textColor="#64748B"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.08" />
@@ -118,10 +120,10 @@
                 android:id="@+id/etLicenseKey"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
-                android:background="@drawable/input_bg"
+                android:background="@drawable/tab_unselected"
                 android:hint="PV-XXXX-YYYY"
-                android:textColorHint="#475569"
-                android:textColor="#10B981"
+                android:textColorHint="#94A3B8"
+                android:textColor="#0F172A"
                 android:fontFamily="monospace"
                 android:textSize="13sp"
                 android:paddingHorizontal="14dp"
@@ -135,7 +137,7 @@
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:background="@drawable/btn_emerald"
+                android:backgroundTint="#6D28D9"
                 android:layout_marginTop="14dp" />
 
             <TextView
@@ -153,21 +155,12 @@
             android:id="@+id/btnWhatsAppSupport"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:text="💬 Request 1-Day Trial / Buy on WhatsApp"
+            android:text="💬 Request Trial / License on WhatsApp"
             android:textColor="#FFFFFF"
             android:textSize="13sp"
             android:textStyle="bold"
-            android:background="@drawable/btn_whatsapp"
+            android:backgroundTint="#25D366"
             android:layout_marginTop="20dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="100% Offline • High Security • No Internet Required"
-            android:textColor="#475569"
-            android:textSize="11sp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp" />
 
     </LinearLayout>
 </ScrollView>

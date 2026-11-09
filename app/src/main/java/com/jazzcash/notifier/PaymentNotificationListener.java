@@ -17,6 +17,14 @@ public class PaymentNotificationListener extends NotificationListenerService {
             return;
         }
 
+        String pkg = sbn.getPackageName() != null ? sbn.getPackageName().toLowerCase() : "";
+
+        // Skip default SMS app notifications because SmsReceiver handles SMS directly with high priority!
+        if (pkg.contains("messaging") || pkg.contains("mms") || pkg.contains("telephony")) {
+            Log.d(TAG, "Ignoring SMS notification from " + pkg + " to prevent duplicate processing.");
+            return;
+        }
+
         Notification notification = sbn.getNotification();
         Bundle extras = notification.extras;
         if (extras == null) return;
@@ -33,8 +41,16 @@ public class PaymentNotificationListener extends NotificationListenerService {
         }
 
         String fullContent = (title + " " + body).trim();
-        Log.d(TAG, "Notification received: " + fullContent);
+        Log.d(TAG, "App Notification from " + pkg + ": " + fullContent);
 
-        PaymentProcessor.processIncomingText(this, title, fullContent);
+        // Identify sender context from package if possible
+        String senderContext = title;
+        if (pkg.contains("mobilink") || pkg.contains("jazzcash")) {
+            senderContext = "8558 - JazzCash App";
+        } else if (pkg.contains("telenor") || pkg.contains("easypaisa")) {
+            senderContext = "3737 - Easypaisa App";
+        }
+
+        PaymentProcessor.processIncomingText(this, senderContext, fullContent);
     }
 }

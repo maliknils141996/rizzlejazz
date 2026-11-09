@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#0F0C1B">
+    android:background="#F8FAFC">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,13 +17,12 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="4dp">
 
             <ImageView
-                android:layout_width="46dp"
-                android:layout_height="46dp"
-                android:src="@drawable/app_logo"
-                android:elevation="4dp" />
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:src="@drawable/app_logo" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -36,7 +35,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="PayVox"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#0F172A"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
@@ -44,7 +43,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Smart Soundbox &amp; Khata"
-                    android:textColor="#C4B5FD"
+                    android:textColor="#64748B"
                     android:textSize="11sp" />
             </LinearLayout>
 
@@ -60,21 +59,22 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="🟢 Active"
-                    android:textColor="#C4B5FD"
+                    android:textColor="#6D28D9"
                     android:textSize="10sp"
                     android:textStyle="bold"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="3dp"
-                    android:background="#5B21B6" />
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:background="@drawable/tab_unselected" />
 
                 <Button
                     android:id="@+id/btnSoundToggle"
                     android:layout_width="wrap_content"
                     android:layout_height="32dp"
                     android:text="🔊 Voice ON"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#6D28D9"
                     android:textSize="10sp"
-                    android:backgroundTint="#241C40"
+                    android:textStyle="bold"
+                    android:backgroundTint="#EDE9FE"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
                     android:layout_marginTop="4dp" />
@@ -87,181 +87,45 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#241C40"
+            android:background="#FEF3C7"
             android:padding="12dp"
             android:layout_marginTop="16dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🔔 Enable Soundbox Notification Access"
-                android:textColor="#FBBF24"
+                android:text="🔔 Notification Access Needed"
+                android:textColor="#92400E"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="To automatically announce incoming payments out loud, please grant notification access."
-                android:textColor="#C4B5FD"
+                android:text="To announce incoming payments out loud, grant notification access."
+                android:textColor="#B45309"
                 android:textSize="11sp"
                 android:layout_marginTop="2dp" />
 
             <Button
                 android:id="@+id/btnEnableNotif"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
+                android:layout_height="34dp"
                 android:text="Grant Access"
                 android:textColor="#FFFFFF"
                 android:textSize="11sp"
-                android:backgroundTint="#7C3AED"
+                android:backgroundTint="#D97706"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:layout_marginTop="6dp" />
         </LinearLayout>
 
-        <!-- UNIFORM LUXURY HERO CARD (NET BALANCE) -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/card_hero"
-            android:padding="20dp"
-            android:layout_marginTop="16dp">
-
-            <TextView
-                android:id="@+id/tvPeriodTag"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TODAY'S NET BALANCE"
-                android:textColor="#6EE7B7"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.08" />
-
-            <TextView
-                android:id="@+id/tvNetBalance"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Rs. 0.00"
-                android:textColor="#FFFFFF"
-                android:textSize="32sp"
-                android:textStyle="bold"
-                android:layout_marginTop="4dp" />
-
-            <!-- INFLOW & OUTFLOW SYMMETRIC PILLS -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="16dp">
-
-                <!-- INFLOW PILL -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:background="@drawable/card_pill_inflow"
-                    android:padding="12dp"
-                    android:layout_marginEnd="6dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="↓ Received (+)"
-                        android:textColor="#34D399"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvInflowTotal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rs. 0"
-                        android:textColor="#FFFFFF"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="2dp" />
-
-                    <TextView
-                        android:id="@+id/tvInflowCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0 payments"
-                        android:textColor="#A7F3D0"
-                        android:textSize="10sp" />
-                </LinearLayout>
-
-                <!-- OUTFLOW PILL -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:background="@drawable/card_pill_outflow"
-                    android:padding="12dp"
-                    android:layout_marginStart="6dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="↑ Sent / Out (-)"
-                        android:textColor="#FDA4AF"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvOutflowTotal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rs. 0"
-                        android:textColor="#FFFFFF"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="2dp" />
-
-                    <TextView
-                        android:id="@+id/tvOutflowCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0 transfers"
-                        android:textColor="#FECDD3"
-                        android:textSize="10sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- AUTOMATED STATUS BADGE -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="⚡ 100% Automated • Auto-tracking JazzCash &amp; Easypaisa"
-                android:textColor="#A7F3D0"
-                android:textSize="10sp"
-                android:gravity="center"
-                android:layout_marginTop="12dp" />
-
-            <!-- SHARE BUTTON -->
-            <Button
-                android:id="@+id/btnShareSummary"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:text="💬 Share Khata Summary on WhatsApp"
-                android:textColor="#FFFFFF"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:backgroundTint="#059669"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:layout_marginTop="12dp" />
-        </LinearLayout>
-
-        <!-- HORIZONTAL FILTER PILL TABS (NO CLUMSY SPINNER) -->
+        <!-- HORIZONTAL FILTER BAR (TODAY, YESTERDAY, THIS MONTH, PICK DATE) -->
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="none"
-            android:layout_marginTop="20dp">
+            android:layout_marginTop="16dp">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -287,7 +151,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="38dp"
                     android:text="Yesterday"
-                    android:textColor="#94A3B8"
+                    android:textColor="#475569"
                     android:textSize="11sp"
                     android:background="@drawable/tab_unselected"
                     android:insetTop="0dp"
@@ -300,7 +164,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="38dp"
                     android:text="This Month"
-                    android:textColor="#94A3B8"
+                    android:textColor="#475569"
                     android:textSize="11sp"
                     android:background="@drawable/tab_unselected"
                     android:insetTop="0dp"
@@ -309,11 +173,11 @@
                     android:layout_marginEnd="8dp" />
 
                 <Button
-                    android:id="@+id/btnFilterAll"
+                    android:id="@+id/btnFilterCalendar"
                     android:layout_width="wrap_content"
                     android:layout_height="38dp"
-                    android:text="All Time"
-                    android:textColor="#94A3B8"
+                    android:text="📅 Pick Date"
+                    android:textColor="#475569"
                     android:textSize="11sp"
                     android:background="@drawable/tab_unselected"
                     android:insetTop="0dp"
@@ -322,20 +186,239 @@
             </LinearLayout>
         </HorizontalScrollView>
 
-        <!-- DATE RANGE LABEL & HEADER -->
+        <!-- TOP TOTAL NET BALANCE HERO CARD -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_hero_purple"
+            android:padding="20dp"
+            android:elevation="3dp"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:id="@+id/tvPeriodTag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TODAY'S TOTAL NET BALANCE"
+                android:textColor="#DDD6FE"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08" />
+
+            <TextView
+                android:id="@+id/tvNetBalance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rs. 0.00"
+                android:textColor="#FFFFFF"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+
+                <TextView
+                    android:id="@+id/tvTotalInflowSummary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="↓ Total In: Rs. 0"
+                    android:textColor="#A7F3D0"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvTotalOutflowSummary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="↑ Total Out: Rs. 0"
+                    android:textColor="#FECDD3"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnShareSummary"
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:text="💬 Share Summary on WhatsApp"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:backgroundTint="#25D366"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:layout_marginTop="14dp" />
+        </LinearLayout>
+
+        <!-- SECTION: DUAL ACCOUNTS (JAZZCASH & EASYPAISA) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Account Ledgers"
+            android:textColor="#0F172A"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <!-- 1. JAZZCASH CARD -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="@drawable/card_jazzcash_white"
+                android:padding="14dp"
+                android:elevation="1dp"
+                android:layout_marginEnd="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="JAZZCASH"
+                        android:textColor="#FFFFFF"
+                        android:textSize="9sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="6dp"
+                        android:paddingVertical="2dp"
+                        android:background="#ED1C24" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="8558"
+                        android:textColor="#64748B"
+                        android:textSize="9sp"
+                        android:layout_marginStart="4dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvJazzNetBalance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rs. 0.00"
+                    android:textColor="#0F172A"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/tvJazzInflow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="↓ In: Rs. 0"
+                    android:textColor="#059669"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:id="@+id/tvJazzOutflow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="↑ Out: Rs. 0"
+                    android:textColor="#E11D48"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <!-- 2. EASYPAISA CARD -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="@drawable/card_easypaisa_white"
+                android:padding="14dp"
+                android:elevation="1dp"
+                android:layout_marginStart="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="EASYPAISA"
+                        android:textColor="#FFFFFF"
+                        android:textSize="9sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="6dp"
+                        android:paddingVertical="2dp"
+                        android:background="#00A651" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="3737"
+                        android:textColor="#64748B"
+                        android:textSize="9sp"
+                        android:layout_marginStart="4dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvEasyNetBalance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rs. 0.00"
+                    android:textColor="#0F172A"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/tvEasyInflow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="↓ In: Rs. 0"
+                    android:textColor="#059669"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:id="@+id/tvEasyOutflow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="↑ Out: Rs. 0"
+                    android:textColor="#E11D48"
+                    android:textSize="10sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- LIVE TRANSACTIONS FEED HEADER -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginTop="16dp">
+            android:layout_marginTop="22dp">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Live Transactions Feed"
-                android:textColor="#FFFFFF"
+                android:textColor="#0F172A"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -344,7 +427,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Today"
-                android:textColor="#94A3B8"
+                android:textColor="#64748B"
                 android:textSize="11sp" />
         </LinearLayout>
 
@@ -368,16 +451,16 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="No transactions recorded for this period."
-                android:textColor="#94A3B8"
+                android:text="No transactions found for this period."
+                android:textColor="#64748B"
                 android:textSize="13sp"
                 android:layout_marginTop="8dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Incoming JazzCash and Easypaisa payments will appear here automatically."
-                android:textColor="#64748B"
+                android:text="Incoming JazzCash (8558) and Easypaisa (3737) payments will appear here."
+                android:textColor="#94A3B8"
                 android:textSize="11sp"
                 android:gravity="center"
                 android:layout_marginTop="4dp" />
@@ -394,8 +477,8 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="PayVox • 100% Offline Secured Khata"
-            android:textColor="#334155"
+            android:text="PayVox"
+            android:textColor="#94A3B8"
             android:textSize="11sp"
             android:gravity="center"
             android:layout_marginTop="24dp"

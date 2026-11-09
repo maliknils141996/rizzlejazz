@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-    private static final String DATABASE_NAME = "RizzleShopKhata.db";
+    private static final String DATABASE_NAME = "PayVoxShopKhata.db";
     private static final int DATABASE_VERSION = 1;
 
     public static final String TABLE_TX = "transactions";
@@ -21,7 +21,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_TRX_ID = "trx_id";
     public static final String COL_AMOUNT = "amount";
     public static final String COL_TYPE = "type"; // 'inflow' or 'outflow'
-    public static final String COL_CHANNEL = "channel"; // 'jazzcash', 'easypaisa', 'manual'
+    public static final String COL_CHANNEL = "channel"; // 'jazzcash', 'easypaisa'
     public static final String COL_SENDER = "sender";
     public static final String COL_RECIPIENT = "recipient";
     public static final String COL_PURPOSE = "purpose";
@@ -77,7 +77,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(COL_TRX_ID, trxId);
         cv.put(COL_AMOUNT, amount);
         cv.put(COL_TYPE, type);
-        cv.put(COL_CHANNEL, channel);
+        cv.put(COL_CHANNEL, channel != null ? channel.toLowerCase() : "jazzcash");
         cv.put(COL_SENDER, sender);
         cv.put(COL_RECIPIENT, recipient);
         cv.put(COL_PURPOSE, purpose);
@@ -90,6 +90,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public synchronized KhataStats getStats(String startDate, String endDate) {
+        return getStats(startDate, endDate, "all");
+    }
+
+    public synchronized KhataStats getStats(String startDate, String endDate, String channelFilter) {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT "
                 + "COALESCE(SUM(CASE WHEN type = 'inflow' THEN amount ELSE 0 END), 0) AS total_inflow, "
@@ -99,7 +103,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + "FROM " + TABLE_TX + " "
                 + "WHERE created_at BETWEEN ? AND ?";
 
-        Cursor c = db.rawQuery(query, new String[]{startDate, endDate});
+        List<String> args = new ArrayList<>();
+        args.add(startDate);
+        args.add(endDate);
+
+        if (channelFilter != null && !"all".equalsIgnoreCase(channelFilter)) {
+            query += " AND channel = ?";
+            args.add(channelFilter.toLowerCase());
+        }
+
+        Cursor c = db.rawQuery(query, args.toArray(new String[0]));
         double inflow = 0, outflow = 0;
         int inCount = 0, outCount = 0;
 
@@ -114,7 +127,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return new KhataStats(inflow, outflow, inCount, outCount);
     }
 
-    public synchronized List<TransactionItem> getTransactions(String startDate, String endDate, String typeFilter) {
+    public synchronized List<TransactionItem> getTransactions(String startDate, String endDate, String channelFilter) {
         List<TransactionItem> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -123,9 +136,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         args.add(startDate);
         args.add(endDate);
 
-        if (!"all".equalsIgnoreCase(typeFilter)) {
-            query += " AND type = ?";
-            args.add(typeFilter);
+        if (channelFilter != null && !"all".equalsIgnoreCase(channelFilter)) {
+            query += " AND channel = ?";
+            args.add(channelFilter.toLowerCase());
         }
 
         query += " ORDER BY id DESC";

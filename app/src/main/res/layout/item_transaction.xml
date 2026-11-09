@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@drawable/card_bg"
+    android:background="@drawable/card_white"
     android:padding="16dp"
     android:layout_marginBottom="12dp">
 
@@ -37,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="+ Rs. 1,500"
-            android:textColor="#10B981"
+            android:textColor="#059669"
             android:textSize="17sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="From: 03001234567"
-        android:textColor="#FFFFFF"
+        android:textColor="#0F172A"
         android:textSize="13sp"
         android:textStyle="bold"
         android:layout_marginTop="8dp" />
@@ -58,7 +58,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Payment Received"
-        android:textColor="#94A3B8"
+        android:textColor="#64748B"
         android:textSize="12sp"
         android:layout_marginTop="2dp" />
 
@@ -76,7 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="TID: 8392109283"
-            android:textColor="#64748B"
+            android:textColor="#94A3B8"
             android:textSize="10sp"
             android:fontFamily="monospace" />
 
@@ -85,7 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="10 Nov, 03:45 PM"
-            android:textColor="#64748B"
+            android:textColor="#94A3B8"
             android:textSize="10sp" />
     </LinearLayout>
 
