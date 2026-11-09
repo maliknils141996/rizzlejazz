@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#0B0F19">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="24dp">
+
+        <!-- LOGO ICON -->
+        <FrameLayout
+            android:layout_width="84dp"
+            android:layout_height="84dp"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/card_hero"
+            android:elevation="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="RJ"
+                android:textColor="#FFFFFF"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:layout_gravity="center" />
+        </FrameLayout>
+
+        <!-- TITLE -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rizzle Merchant"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Official JazzCash &amp; Easypaisa Soundbox Khata"
+            android:textColor="#94A3B8"
+            android:textSize="12sp"
+            android:layout_marginTop="4dp" />
+
+        <!-- DEVICE ID CARD -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg"
+            android:padding="18dp"
+            android:layout_marginTop="32dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="YOUR UNIQUE DEVICE ID:"
+                android:textColor="#10B981"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:id="@+id/tvDeviceId"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="RJ-XXXX-XXXX"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:fontFamily="monospace"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btnCopyDeviceId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="38dp"
+                    android:text="Copy ID"
+                    android:textColor="#10B981"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:backgroundTint="#064E3B"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Share this Device ID with support to activate your license."
+                android:textColor="#64748B"
+                android:textSize="11sp"
+                android:layout_marginTop="6dp" />
+        </LinearLayout>
+
+        <!-- LICENSE INPUT CARD -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg"
+            android:padding="18dp"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ENTER LICENSE KEY"
+                android:textColor="#94A3B8"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08" />
+
+            <EditText
+                android:id="@+id/etLicenseKey"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="@drawable/input_bg"
+                android:hint="RJ-XXXX-YYYY"
+                android:textColorHint="#475569"
+                android:textColor="#10B981"
+                android:fontFamily="monospace"
+                android:textSize="13sp"
+                android:paddingHorizontal="14dp"
+                android:layout_marginTop="8dp" />
+
+            <Button
+                android:id="@+id/btnActivate"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Activate License"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:background="@drawable/btn_emerald"
+                android:layout_marginTop="14dp" />
+
+            <TextView
+                android:id="@+id/tvStatusMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:gravity="center"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <!-- WHATSAPP SUPPORT BUTTON -->
+        <Button
+            android:id="@+id/btnWhatsAppSupport"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="💬 Request 1-Day Trial / Buy on WhatsApp"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:background="@drawable/btn_whatsapp"
+            android:layout_marginTop="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="100% Offline • High Security • No Internet Required"
+            android:textColor="#475569"
+            android:textSize="11sp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp" />
+
+    </LinearLayout>
+</ScrollView>

@@ -1,4 +1,4 @@
-name: Build Rizzle Jazz Merchant APK
+name: Build Rizzle Merchant Soundbox & Khata APK
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: Build & Release Rizzle Jazz Merchant APK
+    name: Build & Release Rizzle Merchant APK
     runs-on: ubuntu-latest
 
     steps:
@@ -36,31 +36,34 @@ jobs:
     - name: Prepare Release Output
       run: |
         mkdir -p release-output
-        cp app/build/outputs/apk/debug/app-debug.apk release-output/Rizzle-Jazz-Merchant.apk
+        cp app/build/outputs/apk/debug/app-debug.apk release-output/Rizzle-Merchant-Soundbox.apk
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Rizzle-Jazz-Merchant-APK
-        path: release-output/Rizzle-Jazz-Merchant.apk
+        name: Rizzle-Merchant-Soundbox-APK
+        path: release-output/Rizzle-Merchant-Soundbox.apk
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v1.0.0-${{ github.run_number }}
-        name: Rizzle Jazz Merchant v1.0.0
+        tag_name: v2.0.0-${{ github.run_number }}
+        name: Rizzle Merchant Soundbox & Khata v2.0
         body: |
-          ### 🎉 Rizzle Jazz Merchant - Official Soundbox & Webhook APK
+          ### 🎉 Rizzle Merchant - Offline Soundbox & Shop Khata APK
 
-          ✅ **Features:**
-          - 📢 **Soundbox Voice Announcement:** Automatically speaks aloud *"JazzCash par [amount] rupay receive ho gaye"* when payment arrives.
-          - 🔔 **Notification & SMS Listener:** Captures both SMS (8558) and JazzCash app push notifications.
-          - 🌐 **Instant Webhook Sync:** Silently sends transaction data to your Hostinger Web Admin Panel.
-          - 🏪 Supports both **Shop Merchant Till/QR** and **Personal** accounts.
+          ✅ **Key Features:**
+          - 📢 **Dual Voice Soundbox:** Real-time Urdu voice announcements for **JazzCash** (`8558`) and **Easypaisa** (`3737`).
+          - 🔐 **Device-Locked Cryptographic Licensing:** Offline HMAC-SHA256 license security (1-Day Trial, Monthly, Yearly).
+          - 📒 **100% Offline SQLite Khata:** Built-in Shop Ledger tracking Net Balance (`Inflow - Outflow`).
+          - 💸 **Cash Out / Withdrawal Management:** Record money transferred out with user notes, recipients, and purpose.
+          - ➕ **Cash In Counter Sale:** Record walk-in counter sales.
+          - 💬 **WhatsApp Khata Sharing:** 1-Click shareable daily/monthly ledger summaries.
+          - 🚫 **Anti-Cheating Protection:** Instant remote blacklist deactivation for lost/stolen phones.
           
-          **Direct Download:** Click `Rizzle-Jazz-Merchant.apk` below to install directly on your phone.
+          **Direct Download:** Click `Rizzle-Merchant-Soundbox.apk` below to download and install.
         draft: false
         prerelease: false
-        files: release-output/Rizzle-Jazz-Merchant.apk
+        files: release-output/Rizzle-Merchant-Soundbox.apk
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

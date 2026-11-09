@@ -2,117 +2,389 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0F172A">
+    android:fillViewport="true"
+    android:background="#0B0F19">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp"
-        android:gravity="center_horizontal">
+        android:padding="20dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rizzle Jazz Merchant"
-            android:textColor="#FFFFFF"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Official Voice Soundbox &amp; Webhook Hub"
-            android:textColor="#94A3B8"
-            android:textSize="12sp"
-            android:layout_marginBottom="20dp" />
-
-        <!-- Status Card -->
-        <TextView
-            android:id="@+id/tvStatus"
+        <!-- HEADER SECTION -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Status: Ready &amp; Listening 🟢"
-            android:textColor="#10B981"
-            android:textSize="13sp"
-            android:textStyle="bold"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
+
+            <FrameLayout
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/card_hero">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="RJ"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_gravity="center" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rizzle Merchant"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Shop Soundbox &amp; Khata"
+                    android:textColor="#94A3B8"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <!-- SOUND TOGGLE & LICENSE PILL -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="end">
+
+                <TextView
+                    android:id="@+id/tvLicenseBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🟢 Active"
+                    android:textColor="#10B981"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"
+                    android:background="#064E3B" />
+
+                <Button
+                    android:id="@+id/btnSoundToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="🔊 Voice ON"
+                    android:textColor="#FFFFFF"
+                    android:textSize="10sp"
+                    android:backgroundTint="#1E293B"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- NOTIFICATION LISTENER HELPER BANNER -->
+        <LinearLayout
+            android:id="@+id/llNotifBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1E293B"
+            android:padding="12dp"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🔔 Enable Soundbox Notification Access"
+                android:textColor="#FBBF24"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="To automatically announce incoming payments out loud, please grant notification access."
+                android:textColor="#94A3B8"
+                android:textSize="11sp"
+                android:layout_marginTop="2dp" />
+
+            <Button
+                android:id="@+id/btnEnableNotif"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Grant Access"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:backgroundTint="#059669"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:layout_marginTop="6dp" />
+        </LinearLayout>
+
+        <!-- HERO NET BALANCE CARD -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_hero"
+            android:padding="20dp"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:id="@+id/tvPeriodTag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TODAY'S NET BALANCE"
+                android:textColor="#10B981"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08" />
+
+            <TextView
+                android:id="@+id/tvNetBalance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rs. 0.00"
+                android:textColor="#FFFFFF"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp" />
+
+            <!-- DIVIDER -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#1F2E4D"
+                android:layout_marginVertical="14dp" />
+
+            <!-- INFLOW & OUTFLOW SUMMARY ROW -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- INFLOW -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↓ Total Received (+)"
+                        android:textColor="#10B981"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvInflowTotal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rs. 0"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="2dp" />
+
+                    <TextView
+                        android:id="@+id/tvInflowCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 payments"
+                        android:textColor="#64748B"
+                        android:textSize="10sp" />
+                </LinearLayout>
+
+                <!-- VERTICAL SEPARATOR -->
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="#1F2E4D"
+                    android:layout_marginHorizontal="12dp" />
+
+                <!-- OUTFLOW -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↑ Total Out / Sent (-)"
+                        android:textColor="#F43F5E"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvOutflowTotal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rs. 0"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="2dp" />
+
+                    <TextView
+                        android:id="@+id/tvOutflowCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 transfers"
+                        android:textColor="#64748B"
+                        android:textSize="10sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- SHARE BUTTON -->
+            <Button
+                android:id="@+id/btnShareSummary"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="💬 Share Khata Summary on WhatsApp"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:backgroundTint="#059669"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:layout_marginTop="16dp" />
+        </LinearLayout>
+
+        <!-- QUICK ACTION BUTTONS: CASH IN & CASH OUT -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/btnCashIn"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:text="➕ Cash In"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:background="@drawable/btn_emerald"
+                android:layout_marginEnd="6dp" />
+
+            <Button
+                android:id="@+id/btnCashOut"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:text="💸 Cash Out / Transfer"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:background="@drawable/btn_rose"
+                android:layout_marginStart="6dp" />
+        </LinearLayout>
+
+        <!-- KHATA FILTER BAR -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="24dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Transaction History"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvDateRangeLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Today"
+                    android:textColor="#94A3B8"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <Spinner
+                android:id="@+id/spDateFilter"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="@drawable/spinner_bg"
+                android:paddingHorizontal="12dp" />
+        </LinearLayout>
+
+        <!-- EMPTY STATE -->
+        <LinearLayout
+            android:id="@+id/llEmptyState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:padding="32dp"
+            android:visibility="gone"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📝"
+                android:textSize="36sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No transactions recorded for this period."
+                android:textColor="#94A3B8"
+                android:textSize="13sp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Incoming JazzCash and Easypaisa payments will appear here automatically."
+                android:textColor="#64748B"
+                android:textSize="11sp"
+                android:gravity="center"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <!-- TRANSACTION LIST CONTAINER -->
+        <LinearLayout
+            android:id="@+id/llTransactionsList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="12dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Rizzle Merchant • 100% Offline Secured Khata"
+            android:textColor="#334155"
+            android:textSize="11sp"
             android:gravity="center"
-            android:padding="12dp"
-            android:background="#1E293B"
+            android:layout_marginTop="24dp"
             android:layout_marginBottom="16dp" />
-
-        <!-- Webhook Input -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Your Hostinger Webhook URL:"
-            android:textColor="#CBD5E1"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="6dp" />
-
-        <EditText
-            android:id="@+id/etWebhookUrl"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="https://yourdomain.com/api/webhook.php"
-            android:textColorHint="#64748B"
-            android:textColor="#FFFFFF"
-            android:background="#1E293B"
-            android:padding="14dp"
-            android:textSize="13sp"
-            android:layout_marginBottom="14dp" />
-
-        <Button
-            android:id="@+id/btnSave"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="Save &amp; Activate Service"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#DC2626"
-            android:layout_marginBottom="10dp" />
-
-        <!-- Notification Soundbox Permission Button -->
-        <Button
-            android:id="@+id/btnNotifPermission"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="🔔 Enable Notification Soundbox (Recommended)"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#059669"
-            android:layout_marginBottom="10dp" />
-
-        <!-- Test Speaker Button -->
-        <Button
-            android:id="@+id/btnTestVoice"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="🔊 Test Voice Speaker"
-            android:textColor="#CBD5E1"
-            android:backgroundTint="#334155"
-            android:layout_marginBottom="20dp" />
-
-        <!-- Live Activity Log -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Live Activity Monitor:"
-            android:textColor="#94A3B8"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
-
-        <TextView
-            android:id="@+id/tvLastEvent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Waiting for transactions..."
-            android:textColor="#E2E8F0"
-            android:textSize="11sp"
-            android:fontFamily="monospace"
-            android:padding="12dp"
-            android:background="#020617" />
 
     </LinearLayout>
 </ScrollView>

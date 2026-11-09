@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/card_bg"
+    android:padding="16dp"
+    android:layout_marginBottom="12dp">
+
+    <!-- Top Row: Channel Badge & Amount -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvTxChannel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="JAZZCASH"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.08"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:background="#ED1C24" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/tvTxAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+ Rs. 1,500"
+            android:textColor="#10B981"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Middle Row: Counterparty and Purpose -->
+    <TextView
+        android:id="@+id/tvTxParty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="From: 03001234567"
+        android:textColor="#FFFFFF"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/tvTxPurpose"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Payment Received"
+        android:textColor="#94A3B8"
+        android:textSize="12sp"
+        android:layout_marginTop="2dp" />
+
+    <!-- Bottom Row: TID & Time -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="8dp">
+
+        <TextView
+            android:id="@+id/tvTxId"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="TID: 8392109283"
+            android:textColor="#64748B"
+            android:textSize="10sp"
+            android:fontFamily="monospace" />
+
+        <TextView
+            android:id="@+id/tvTxTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10 Nov, 03:45 PM"
+            android:textColor="#64748B"
+            android:textSize="10sp" />
+    </LinearLayout>
+
+</LinearLayout>
