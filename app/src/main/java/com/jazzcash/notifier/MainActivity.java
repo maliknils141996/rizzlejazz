@@ -151,8 +151,7 @@ public class MainActivity extends Activity {
         });
 
         btnEnableNotif.setOnClickListener(v -> {
-            startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
-            Toast.makeText(this, "Enable 'PayVox' in Notification Access", Toast.LENGTH_LONG).show();
+            PermissionHelper.requestAppPermissions(this);
         });
 
         btnShareSummary.setOnClickListener(v -> shareReportViaWhatsApp());
@@ -221,7 +220,7 @@ public class MainActivity extends Activity {
             return;
         }
 
-        checkNotificationListenerPermission();
+        updatePermissionBanner();
         loadKhataData();
 
         // Register Live Refresh Receiver
@@ -249,20 +248,24 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void checkNotificationListenerPermission() {
-        boolean enabled = NotificationManagerCompat.getEnabledListenerPackages(this).contains(getPackageName());
-        llNotifBanner.setVisibility(enabled ? View.GONE : View.VISIBLE);
+    private void updatePermissionBanner() {
+        boolean hasPerms = PermissionHelper.hasAllRequiredPermissions(this);
+        llNotifBanner.setVisibility(hasPerms ? View.GONE : View.VISIBLE);
     }
 
     private void checkPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
-                checkSelfPermission(Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{
-                        Manifest.permission.RECEIVE_SMS,
-                        Manifest.permission.READ_SMS
-                }, SMS_PERMISSION_REQ_CODE);
-            }
+        if (!PermissionHelper.hasAllRequiredPermissions(this)) {
+            PermissionHelper.requestAppPermissions(this);
+        }
+        updatePermissionBanner();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        updatePermissionBanner();
+        if (PermissionHelper.hasAllRequiredPermissions(this)) {
+            Toast.makeText(this, "✅ Permissions Granted! Soundbox is Active.", Toast.LENGTH_SHORT).show();
         }
     }
 

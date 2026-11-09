@@ -27,6 +27,8 @@ public class ActivationActivity extends Activity {
     private Button btnActivate;
     private Button btnCopyDeviceId;
     private Button btnWhatsAppSupport;
+    private View llActivationPermBanner;
+    private Button btnActivationAllowPerm;
     private String currentDeviceId;
 
     @Override
@@ -47,15 +49,32 @@ public class ActivationActivity extends Activity {
         btnActivate = findViewById(R.id.btnActivate);
         btnCopyDeviceId = findViewById(R.id.btnCopyDeviceId);
         btnWhatsAppSupport = findViewById(R.id.btnWhatsAppSupport);
+        llActivationPermBanner = findViewById(R.id.llActivationPermBanner);
+        btnActivationAllowPerm = findViewById(R.id.btnActivationAllowPerm);
 
         currentDeviceId = LicenseManager.getDeviceId(this);
         tvDeviceId.setText(currentDeviceId);
 
         btnCopyDeviceId.setOnClickListener(v -> copyDeviceIdToClipboard());
-
         btnActivate.setOnClickListener(v -> handleActivation());
-
         btnWhatsAppSupport.setOnClickListener(v -> openWhatsAppForSupport());
+
+        btnActivationAllowPerm.setOnClickListener(v -> {
+            PermissionHelper.requestAppPermissions(this);
+        });
+
+        // Prompt permissions directly on launch if not already granted
+        if (!PermissionHelper.hasAllRequiredPermissions(this)) {
+            PermissionHelper.requestAppPermissions(this);
+        }
+        updatePermissionBanner();
+    }
+
+    private void updatePermissionBanner() {
+        boolean hasPerms = PermissionHelper.hasAllRequiredPermissions(this);
+        if (llActivationPermBanner != null) {
+            llActivationPermBanner.setVisibility(hasPerms ? View.GONE : View.VISIBLE);
+        }
     }
 
     @Override
@@ -63,6 +82,17 @@ public class ActivationActivity extends Activity {
         super.onResume();
         if (LicenseManager.isLicenseActive(this)) {
             launchMainActivity();
+            return;
+        }
+        updatePermissionBanner();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        updatePermissionBanner();
+        if (PermissionHelper.hasAllRequiredPermissions(this)) {
+            Toast.makeText(this, "Permissions Allowed!", Toast.LENGTH_SHORT).show();
         }
     }
 

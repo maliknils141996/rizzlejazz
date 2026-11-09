@@ -81,43 +81,46 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- NOTIFICATION LISTENER HELPER BANNER -->
+        <!-- SMS & VOICE PERMISSION BANNER (Shows only if permissions need to be allowed) -->
         <LinearLayout
             android:id="@+id/llNotifBanner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="#FEF3C7"
-            android:padding="12dp"
-            android:layout_marginTop="16dp">
+            android:padding="14dp"
+            android:elevation="1dp"
+            android:layout_marginTop="16dp"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🔔 Notification Access Needed"
+                android:text="🔔 Permissions Required"
                 android:textColor="#92400E"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="To announce incoming payments out loud, grant notification access."
+                android:text="PayVox needs SMS and sound permissions to announce payments out loud."
                 android:textColor="#B45309"
                 android:textSize="11sp"
-                android:layout_marginTop="2dp" />
+                android:layout_marginTop="3dp" />
 
             <Button
                 android:id="@+id/btnEnableNotif"
-                android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:text="Grant Access"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="⚡ Allow Permissions (الاؤ کریں)"
                 android:textColor="#FFFFFF"
-                android:textSize="11sp"
+                android:textSize="12sp"
+                android:textStyle="bold"
                 android:backgroundTint="#D97706"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                android:layout_marginTop="6dp" />
+                android:layout_marginTop="8dp" />
         </LinearLayout>
 
         <!-- SOPHISTICATED SEGMENTED FILTER BAR -->

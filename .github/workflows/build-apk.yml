@@ -47,18 +47,16 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v2.5.1-${{ github.run_number }}
-        name: PayVox v2.5.1 - Clean UI & Inflow/Outflow Soundbox
+        tag_name: v2.5.2-${{ github.run_number }}
+        name: PayVox v2.5.2 - 1-Click In-App Permission Dialogs
         body: |
-          ### 💜 PayVox v2.5.1 - Clean UI & Smart Soundbox
+          ### 💜 PayVox v2.5.2 - Instant On-Screen Permission Allow
 
           ✅ **Key Upgrades:**
-          - 🎨 **Cleaner Merchant Interface:** Removed 8558 and 3737 numbers from JazzCash & Easypaisa cards and live feed badges.
-          - 💸 **Outgoing Payments (Outflow) Detection:** Whenever you send money from JazzCash or Easypaisa, PayVox detects it and subtracts it from your ledger in real-time.
-          - 🗣️ **Outflow Urdu Voice Announcement:** Speaks out loud: *"JazzCash se [amount] rupay send ho gaye hain"* or *"Easypaisa se [amount] rupay send ho gaye hain"*.
-          - ⚖️ **Accurate Net Balance:** Keeps track of Total Inflow, Total Outflow, and Daily Net Profit/Balance (`Inflow - Outflow`).
-          - 📡 **Dual SMS & App Support:** Catches both official SMS (8558/3737) and app push notifications.
-          - 🛡️ **Zero Duplicate Alerts:** Intelligent 25-second deduplication prevents multiple announcements for the same transaction.
+          - ⚡ **1-Click On-Screen "Allow" Dialogs:** No need to ever open phone settings! PayVox directly triggers the native on-screen Android "Allow / Don't Allow" popups for SMS & Sound permissions.
+          - 📱 **Interactive In-App Button:** Added a prominent `[⚡ Allow Permissions (الاؤ کریں)]` button inside the app that pops up the permission dialog instantly on tap.
+          - 🚫 **Zero Settings Needed for Offline Mode:** Offline SMS soundbox works immediately once Allowed on screen; no deep phone settings navigation required!
+          - 🎨 **Cleaner Merchant Interface:** Clean badges for JazzCash and Easypaisa.
 
           **Direct Download:** Click `PayVox.apk` below to download and install.
         draft: false
