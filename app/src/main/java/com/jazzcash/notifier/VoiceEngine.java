@@ -63,6 +63,19 @@ public class VoiceEngine {
         speak(text);
     }
 
+    public void speakOutflow(String channel, double amount) {
+        if (!isSoundEnabled()) return;
+
+        final String text;
+        if ("easypaisa".equalsIgnoreCase(channel)) {
+            text = "Easypaisa se " + (long)amount + " rupay send ho gaye hain";
+        } else {
+            text = "JazzCash se " + (long)amount + " rupay send ho gaye hain";
+        }
+
+        speak(text);
+    }
+
     public void speak(String text) {
         if (tts != null && isReady) {
             tts.speak(text, TextToSpeech.QUEUE_ADD, null, "PAYMENT_ANNOUNCE");

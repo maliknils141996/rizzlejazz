@@ -42,34 +42,38 @@ public class PaymentNotificationListener extends NotificationListenerService {
         String fullContent = (title + " " + body).trim();
         String lowerContent = fullContent.toLowerCase();
 
-        // 2. Proof of incoming payment (matches Raast, JazzCash app, Easypaisa app, Bank alerts)
-        boolean isExplicitIncoming = lowerContent.contains("received") ||
-                                     lowerContent.contains("incoming payment") ||
-                                     lowerContent.contains("has sent you") ||
-                                     lowerContent.contains("sent you") ||
-                                     lowerContent.contains("credited") ||
-                                     lowerContent.contains("deposited");
+        // 2. Identify Financial Transaction (Inflow OR Outflow)
+        boolean isIncoming = lowerContent.contains("received") ||
+                             lowerContent.contains("incoming payment") ||
+                             lowerContent.contains("has sent you") ||
+                             lowerContent.contains("sent you") ||
+                             lowerContent.contains("credited") ||
+                             lowerContent.contains("deposited");
 
-        if (!isExplicitIncoming) {
-            Log.d(TAG, "Ignoring non-incoming payment notification: " + fullContent);
+        boolean isOutflow = lowerContent.contains("you have sent") ||
+                            lowerContent.contains("you sent") ||
+                            lowerContent.contains("sent rs") ||
+                            lowerContent.contains("paid to") ||
+                            lowerContent.contains("paid rs") ||
+                            lowerContent.contains("payment to") ||
+                            lowerContent.contains("transferred to") ||
+                            (lowerContent.contains("payment of rs") && (lowerContent.contains("successful") || lowerContent.contains("to "))) ||
+                            (lowerContent.contains("successful") && lowerContent.contains("to ")) ||
+                            lowerContent.contains("cash withdrawal") ||
+                            lowerContent.contains("withdrawn rs") ||
+                            lowerContent.contains("debited");
+
+        // Filter out non-financial system notifications (OTP, login, balance check, etc.)
+        if (lowerContent.contains("otp") ||
+            lowerContent.contains("login") ||
+            lowerContent.contains("verification code") ||
+            lowerContent.contains("balance inquiry") ||
+            lowerContent.contains("password")) {
             return;
         }
 
-        // 3. Outbound notifications must NEVER trigger an incoming alert
-        // (E.g. Merchant sends money out: "You sent Rs 500 to...", "Payment of Rs 1 was successful to...", "transferred to...")
-        if (lowerContent.contains("you have sent") ||
-            lowerContent.contains("you sent") ||
-            lowerContent.contains("paid to") ||
-            (lowerContent.contains("payment to") && !lowerContent.contains("received")) ||
-            (lowerContent.contains("successful to") && !lowerContent.contains("received")) ||
-            lowerContent.contains("transferred to") ||
-            lowerContent.contains("cash withdrawal") ||
-            lowerContent.contains("withdrawn rs") ||
-            lowerContent.contains("debited") ||
-            lowerContent.contains("otp") ||
-            lowerContent.contains("login") ||
-            lowerContent.contains("balance inquiry")) {
-            Log.d(TAG, "Ignoring outbound/system notification: " + fullContent);
+        if (!isIncoming && !isOutflow) {
+            Log.d(TAG, "Ignoring non-payment notification: " + fullContent);
             return;
         }
 

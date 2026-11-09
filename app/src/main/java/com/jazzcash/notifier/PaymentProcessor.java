@@ -120,8 +120,8 @@ public class PaymentProcessor {
 
         // 6. DEDUPLICATION CHECK
         long now = System.currentTimeMillis();
-        String dedupKeyWithTrx = channel + "_" + (long)amount + "_" + trxId;
-        String dedupKeyGeneral = channel + "_" + (long)amount;
+        String dedupKeyWithTrx = channel + "_" + type + "_" + (long)amount + "_" + trxId;
+        String dedupKeyGeneral = channel + "_" + type + "_" + (long)amount;
 
         Long lastSeenWithTrx = processedAlertsCache.get(dedupKeyWithTrx);
         if (lastSeenWithTrx != null && (now - lastSeenWithTrx) < DEDUP_WINDOW_MS) {
@@ -155,10 +155,11 @@ public class PaymentProcessor {
         if (inserted) {
             Log.d(TAG, "Recorded " + type + " of Rs. " + amount + " on " + channel + " (TID: " + trxId + ")");
 
-            // 9. Voice Announcement ONLY for INFLOW (+) on this exact channel!
-            // Outflows are SILENT (they only update Khata).
+            // 9. Voice Announcement for both INFLOW (+) and OUTFLOW (-) on this exact channel!
             if ("inflow".equalsIgnoreCase(type)) {
                 VoiceEngine.getInstance(context).speakPayment(channel, amount);
+            } else if ("outflow".equalsIgnoreCase(type)) {
+                VoiceEngine.getInstance(context).speakOutflow(channel, amount);
             }
 
             // 10. Live refresh MainActivity

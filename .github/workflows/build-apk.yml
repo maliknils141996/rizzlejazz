@@ -47,17 +47,17 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v2.4.0-${{ github.run_number }}
-        name: PayVox v2.4 - Full Raast & App Notification Soundbox (Wi-Fi & SIM-less)
+        tag_name: v2.5.0-${{ github.run_number }}
+        name: PayVox v2.5 - Inflow & Outflow Voice Soundbox & Automatic Net Khata
         body: |
-          ### 💜 PayVox v2.4 - Wi-Fi & SIM-less Soundbox + Raast Support
+          ### 💜 PayVox v2.5 - Full Inflow & Outflow Voice Soundbox
 
           ✅ **Key Upgrades:**
-          - 📡 **Works Without SIM (Wi-Fi Mode):** Full real-time incoming payment detection directly from JazzCash & Easypaisa push notifications (e.g. Raast incoming payments).
-          - ⚡ **Raast Payment Voice & Ledger:** Detects `Rs [amount] received from [Sender] AC ... via Raast`, speaks sender amount out loud, and logs sender name cleanly to the Khata.
-          - 🛡️ **Intelligent Deduplication:** When both SMS and App Push Notification arrive for the same payment, PayVox announces ONLY ONCE and prevents duplicate ledger entries.
-          - 🔇 **Outbound & Bonus Filter:** Mutes cashbacks, rewards, and outbound transfer notifications. Only real incoming customer money speaks.
-          - 🎯 **Dual Khata System:** Independent balance tracking for JazzCash & Easypaisa.
+          - 💸 **Outgoing Payments (Outflow) Detection:** Whenever you send money from JazzCash or Easypaisa (e.g. paying suppliers, bills, or transfers), PayVox detects it and subtracts it from your ledger in real-time.
+          - 🗣️ **Outflow Urdu Voice Announcement:** Speaks out loud: *"JazzCash se [amount] rupay send ho gaye hain"* or *"Easypaisa se [amount] rupay send ho gaye hain"*.
+          - ⚖️ **Accurate Net Balance:** Keeps track of Total Inflow, Total Outflow, and Daily Net Profit/Balance (`Inflow - Outflow`).
+          - 📡 **Dual SMS & App Support:** Catches both official SMS (8558/3737) and app push notifications.
+          - 🛡️ **Zero Duplicate Alerts:** Intelligent 25-second deduplication prevents multiple announcements for the same transaction.
 
           **Direct Download:** Click `PayVox.apk` below to download and install.
         draft: false
