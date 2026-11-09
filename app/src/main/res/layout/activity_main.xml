@@ -66,41 +66,22 @@
                     android:paddingVertical="4dp"
                     android:background="@drawable/tab_unselected" />
 
-                <LinearLayout
+                <Button
+                    android:id="@+id/btnSoundToggle"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="4dp">
-
-                    <Button
-                        android:id="@+id/btnTestVoice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="32dp"
-                        android:text="📢 Test Voice"
-                        android:textColor="#059669"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:backgroundTint="#D1FAE5"
-                        android:insetTop="0dp"
-                        android:insetBottom="0dp"
-                        android:layout_marginEnd="4dp" />
-
-                    <Button
-                        android:id="@+id/btnSoundToggle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="32dp"
-                        android:text="🔊 Voice ON"
-                        android:textColor="#6D28D9"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:backgroundTint="#EDE9FE"
-                        android:insetTop="0dp"
-                        android:insetBottom="0dp" />
-                </LinearLayout>
+                    android:layout_height="32dp"
+                    android:text="🔊 Voice ON"
+                    android:textColor="#6D28D9"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:backgroundTint="#EDE9FE"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:layout_marginTop="4dp" />
             </LinearLayout>
         </LinearLayout>
 
-        <!-- SMART PERMISSIONS & NOTIFICATION ACCESS BANNER -->
+        <!-- UNIFIED ALL-IN-ONE PERMISSIONS BANNER -->
         <LinearLayout
             android:id="@+id/llNotifBanner"
             android:layout_width="match_parent"
@@ -116,7 +97,7 @@
                 android:id="@+id/tvBannerTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🔔 Notification Access Needed"
+                android:text="⚠️ تمام پرمیشنز آن کریں (Permissions Required)"
                 android:textColor="#92400E"
                 android:textSize="13sp"
                 android:textStyle="bold" />
@@ -125,7 +106,7 @@
                 android:id="@+id/tvBannerSubtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="بغیر سم نوٹیفکیشن سننے کے لیے سیٹنگ میں جا کر PayVox کو آن کریں۔"
+                android:text="آواز اور کھاتہ چلانے کے لیے ایک کلک میں تمام پرمیشنز آن کریں۔"
                 android:textColor="#B45309"
                 android:textSize="11sp"
                 android:layout_marginTop="3dp" />
@@ -133,8 +114,8 @@
             <Button
                 android:id="@+id/btnEnableNotif"
                 android:layout_width="match_parent"
-                android:layout_height="42dp"
-                android:text="⚙️ سیٹنگز کھولیں اور PayVox آن کریں"
+                android:layout_height="44dp"
+                android:text="⚡ تمام پرمیشنز الاؤ کریں (Allow All Permissions)"
                 android:textColor="#FFFFFF"
                 android:textSize="12sp"
                 android:textStyle="bold"

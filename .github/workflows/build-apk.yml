@@ -47,15 +47,15 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v2.5.3-${{ github.run_number }}
-        name: PayVox v2.5.3 - Direct Notification Access Recovery & Test Voice Button
+        tag_name: v2.5.4-${{ github.run_number }}
+        name: PayVox v2.5.4 - Master VIP License & 1-Click Unified Permission Setup
         body: |
-          ### 💜 PayVox v2.5.3 - Notification Access & Instant Voice Test
+          ### 💜 PayVox v2.5.4 - Master License & All-In-One Permission Flow
 
           ✅ **Key Upgrades:**
-          - 🔔 **Notification Access Recovery (No-SIM / Wi-Fi Support):** Fixed issue where devices without SIM stopped announcing because Notification Access was unbound. Now automatically requests rebind and provides a 1-click settings button if not yet enabled!
-          - 📢 **Instant "Test Voice" Button:** Added a prominent green `[📢 Test Voice]` button on the top-right so merchants can tap and test their speaker & soundbox voice anytime.
-          - ⚡ **Dual Smart Permissions:** Auto-detects whether device needs SMS permission (on-screen Allow popup) or Notification Access (direct settings shortcut).
+          - 👑 **Universal Master Testing License:** Enter `PV-MASTER-2026-VIP` on ANY device to instantly activate 10 Years VIP testing access without generating keys!
+          - ⚡ **1-Click All-in-One Permissions:** A single `[⚡ تمام پرمیشنز الاؤ کریں]` button handles SMS runtime permission and directly launches Notification Access in sequence.
+          - 🎨 **Cleaner Layout:** Removed test button and streamlined top control bar with original voice toggle.
 
           **Direct Download:** Click `PayVox.apk` below to download and install.
         draft: false

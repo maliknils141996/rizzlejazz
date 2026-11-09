@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -36,7 +37,6 @@ public class MainActivity extends Activity {
 
     private TextView tvLicenseBadge;
     private Button btnSoundToggle;
-    private Button btnTestVoice;
     private LinearLayout llNotifBanner;
     private TextView tvBannerTitle;
     private TextView tvBannerSubtitle;
@@ -100,7 +100,6 @@ public class MainActivity extends Activity {
     private void initViews() {
         tvLicenseBadge = findViewById(R.id.tvLicenseBadge);
         btnSoundToggle = findViewById(R.id.btnSoundToggle);
-        btnTestVoice = findViewById(R.id.btnTestVoice);
         llNotifBanner = findViewById(R.id.llNotifBanner);
         tvBannerTitle = findViewById(R.id.tvBannerTitle);
         tvBannerSubtitle = findViewById(R.id.tvBannerSubtitle);
@@ -150,11 +149,6 @@ public class MainActivity extends Activity {
     }
 
     private void setupClickListeners() {
-        btnTestVoice.setOnClickListener(v -> {
-            VoiceEngine.getInstance(this).speak("PayVox soundbox bilkul theek kaam kar raha hai");
-            Toast.makeText(this, "📢 Testing Soundbox Voice...", Toast.LENGTH_SHORT).show();
-        });
-
         btnSoundToggle.setOnClickListener(v -> {
             boolean current = VoiceEngine.getInstance(this).isSoundEnabled();
             VoiceEngine.getInstance(this).setSoundEnabled(!current);
@@ -162,9 +156,7 @@ public class MainActivity extends Activity {
             Toast.makeText(this, !current ? "Soundbox Voice Enabled" : "Soundbox Voice Muted", Toast.LENGTH_SHORT).show();
         });
 
-        btnEnableNotif.setOnClickListener(v -> {
-            PermissionHelper.requestAppPermissions(this);
-        });
+        btnEnableNotif.setOnClickListener(v -> handleAllowAllPermissions());
 
         btnShareSummary.setOnClickListener(v -> shareReportViaWhatsApp());
     }
@@ -272,32 +264,56 @@ public class MainActivity extends Activity {
         boolean runtimePerms = PermissionHelper.hasAllRequiredPermissions(this);
         boolean notifAccess = NotificationManagerCompat.getEnabledListenerPackages(this).contains(getPackageName());
 
-        if (!runtimePerms) {
+        if (!runtimePerms || !notifAccess) {
             llNotifBanner.setVisibility(View.VISIBLE);
-            if (tvBannerTitle != null) tvBannerTitle.setText("⚠️ SMS & Voice Permission Required");
-            if (tvBannerSubtitle != null) tvBannerSubtitle.setText("Click Allow to enable payment voice announcements.");
-            if (btnEnableNotif != null) {
-                btnEnableNotif.setText("⚡ Allow Permissions (الاؤ کریں)");
-                btnEnableNotif.setOnClickListener(v -> PermissionHelper.requestAppPermissions(this));
+            if (tvBannerTitle != null) tvBannerTitle.setText("⚠️ تمام پرمیشنز آن کریں (Permissions Required)");
+            if (tvBannerSubtitle != null) {
+                if (!runtimePerms && !notifAccess) {
+                    tvBannerSubtitle.setText("ایس ایم ایس اور نوٹیفکیشن ایکسیس الاؤ کرنے کے لیے نیچے بٹن دبائیں۔");
+                } else if (!runtimePerms) {
+                    tvBannerSubtitle.setText("ادائیگی کی آواز سننے کے لیے ایس ایم ایس پرمیشن الاؤ کریں۔");
+                } else {
+                    tvBannerSubtitle.setText("جاز کیش اور ایزی پیسہ ایپ کے نوٹیفکیشن سننے کے لیے نوٹیفکیشن ایکسیس آن کریں۔");
+                }
             }
-        } else if (!notifAccess) {
-            // Runtime perms are granted, but Notification Access is off (CRITICAL for phones without SIM!)
-            llNotifBanner.setVisibility(View.VISIBLE);
-            if (tvBannerTitle != null) tvBannerTitle.setText("🔔 Notification Access Needed (بغیر سم کے لیے)");
-            if (tvBannerSubtitle != null) tvBannerSubtitle.setText("جاز کیش اور ایزی پیسہ ایپ کے نوٹیفکیشن سننے کے لیے سیٹنگ میں PayVox کا بٹن آن کریں۔");
             if (btnEnableNotif != null) {
-                btnEnableNotif.setText("⚙️ سیٹنگز کھولیں اور PayVox آن کریں");
-                btnEnableNotif.setOnClickListener(v -> {
-                    try {
-                        startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
-                        Toast.makeText(this, "PayVox ko dhoondh kar ON karein", Toast.LENGTH_LONG).show();
-                    } catch (Exception e) {
-                        startActivity(new Intent(Settings.ACTION_SETTINGS));
-                    }
-                });
+                btnEnableNotif.setText("⚡ تمام پرمیشنز الاؤ کریں (Allow All Permissions)");
             }
         } else {
             llNotifBanner.setVisibility(View.GONE);
+        }
+    }
+
+    private void handleAllowAllPermissions() {
+        boolean hasSms = true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            hasSms = (checkSelfPermission(Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED &&
+                      checkSelfPermission(Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED);
+        }
+        boolean hasNotifAccess = NotificationManagerCompat.getEnabledListenerPackages(this).contains(getPackageName());
+
+        if (!hasSms) {
+            // Check if permanently denied, if so open app details
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                !shouldShowRequestPermissionRationale(Manifest.permission.RECEIVE_SMS) &&
+                getSharedPreferences("PayVoxPerms", MODE_PRIVATE).getBoolean("sms_asked", false)) {
+                try {
+                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    intent.setData(Uri.parse("package:" + getPackageName()));
+                    startActivity(intent);
+                    Toast.makeText(this, "Permissions me ja kar SMS ko Allow karein", Toast.LENGTH_LONG).show();
+                    return;
+                } catch (Exception ignored) {}
+            }
+            getSharedPreferences("PayVoxPerms", MODE_PRIVATE).edit().putBoolean("sms_asked", true).apply();
+            PermissionHelper.requestAppPermissions(this);
+        } else if (!hasNotifAccess) {
+            try {
+                startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
+                Toast.makeText(this, "PayVox ko dhoondh kar ON karein", Toast.LENGTH_LONG).show();
+            } catch (Exception e) {
+                startActivity(new Intent(Settings.ACTION_SETTINGS));
+            }
         }
     }
 
@@ -311,10 +327,17 @@ public class MainActivity extends Activity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        updatePermissionBanner();
-        if (PermissionHelper.hasAllRequiredPermissions(this)) {
-            Toast.makeText(this, "✅ Permissions Granted! Soundbox is Active.", Toast.LENGTH_SHORT).show();
+        
+        // If notification access is still missing, immediately open notification settings
+        boolean hasNotifAccess = NotificationManagerCompat.getEnabledListenerPackages(this).contains(getPackageName());
+        if (!hasNotifAccess) {
+            try {
+                startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
+                Toast.makeText(this, "PayVox ko dhoondh kar ON karein", Toast.LENGTH_LONG).show();
+            } catch (Exception ignored) {}
         }
+
+        updatePermissionBanner();
     }
 
     private void loadKhataData() {

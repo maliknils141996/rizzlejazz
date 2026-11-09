@@ -74,7 +74,21 @@ public class LicenseManager {
 
     public static ValidationResult activateLicense(Context context, String inputKey) {
         if (inputKey == null) return new ValidationResult(false, "License key cannot be empty.");
-        String key = inputKey.trim();
+        String key = inputKey.trim().toUpperCase(Locale.ROOT);
+
+        // MASTER DEVELOPER / VIP TESTING KEYS (Works on ANY device for 10 years)
+        if ("PV-MASTER-2026-VIP".equals(key) || "PV-MASTER-TEST-786".equals(key) || "PV-TEST-MASTER".equals(key)) {
+            long lifetimeExpiry = System.currentTimeMillis() + (3650L * 24 * 60 * 60 * 1000); // 10 years (3,650 days)
+            SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+            prefs.edit()
+                    .putString(KEY_LICENSE, key)
+                    .putLong(KEY_EXPIRY, lifetimeExpiry)
+                    .putLong(KEY_LAST_SEEN, System.currentTimeMillis())
+                    .putBoolean(KEY_BLACKLISTED, false)
+                    .apply();
+
+            return new ValidationResult(true, "👑 Master License Activated! (10 Years VIP Access)");
+        }
 
         if (!key.startsWith("PV-") && !key.startsWith("RJ-")) {
             return new ValidationResult(false, "Invalid format. Key must start with PV-");
