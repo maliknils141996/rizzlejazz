@@ -77,31 +77,39 @@ public class PaymentProcessor {
         }
 
         // 3. IDENTIFY TRANSACTION TYPE (INFLOW VS OUTFLOW)
-        boolean isInflow = lowerMsg.contains("received") ||
+        // High priority: Check Outflow signals first (e.g. "sent to RIZZLE PHARMACY... will be credited within 30 minutes")
+        boolean isOutflow = lowerMsg.contains("sent to ") ||
+                            lowerMsg.contains("you have sent") ||
+                            lowerMsg.contains("you sent") ||
+                            lowerMsg.contains("sent rs") ||
+                            lowerMsg.contains("sent pkr") ||
+                            lowerMsg.contains("paid to") ||
+                            lowerMsg.contains("paid rs") ||
+                            lowerMsg.contains("transferred to") ||
+                            lowerMsg.contains("transfer to") ||
+                            lowerMsg.contains("will be credited") || // Outbound bank transfer confirmation
+                            (lowerMsg.contains("payment to") && !lowerMsg.contains("received") && !lowerMsg.contains("recieved")) ||
+                            (lowerMsg.contains("successful to") && !lowerMsg.contains("received") && !lowerMsg.contains("recieved")) ||
+                            lowerMsg.contains("cash withdrawal") ||
+                            lowerMsg.contains("withdrawn") ||
+                            lowerMsg.contains("debited");
+
+        boolean isInflow = !isOutflow && (
+                           lowerMsg.contains("received") ||
+                           lowerMsg.contains("recieved") || // JazzCash official SMS spelling: "You have Recieved Rs..."
                            lowerMsg.contains("incoming payment") ||
                            lowerMsg.contains("has sent you") ||
                            lowerMsg.contains("sent you") ||
-                           lowerMsg.contains("credited") ||
-                           lowerMsg.contains("deposited");
-
-        boolean isOutflow = (lowerMsg.contains("you have sent") ||
-                            lowerMsg.contains("you sent") ||
-                            lowerMsg.contains("sent rs") ||
-                            lowerMsg.contains("paid to") ||
-                            lowerMsg.contains("paid rs") ||
-                            (lowerMsg.contains("payment to") && !lowerMsg.contains("received")) ||
-                            (lowerMsg.contains("payment of rs") && lowerMsg.contains("to ") && !lowerMsg.contains("received")) ||
-                            (lowerMsg.contains("successful") && lowerMsg.contains("to ") && !lowerMsg.contains("received")) ||
-                            lowerMsg.contains("transferred to") ||
-                            lowerMsg.contains("cash withdrawal") ||
-                            lowerMsg.contains("withdrawn rs") ||
-                            lowerMsg.contains("debited")) && !isInflow;
+                           (lowerMsg.contains("credited") && !lowerMsg.contains("will be credited")) ||
+                           lowerMsg.contains("deposited") ||
+                           lowerMsg.contains("qr payment")
+        );
 
         String type;
-        if (isInflow) {
-            type = "inflow";
-        } else if (isOutflow) {
+        if (isOutflow) {
             type = "outflow";
+        } else if (isInflow) {
+            type = "inflow";
         } else {
             // Not a clear payment transaction (could be balance check, promo, etc.)
             Log.d(TAG, "Message neither explicit inflow nor outflow. Ignoring: " + message);
@@ -171,14 +179,14 @@ public class PaymentProcessor {
     private static double extractAmount(String msg) {
         try {
             // Pattern 1: "Received Rs. 1,500.00", "sent Rs. 500", "Payment of Rs 1000", "credited with Rs. 250"
-            Pattern p1 = Pattern.compile("(?:Received|received|sent|Transferred|Payment of|credited with|withdrawal of)\\s*Rs\\.?\\s*([0-9,]+(?:\\.[0-9]{1,2})?)", Pattern.CASE_INSENSITIVE);
+            Pattern p1 = Pattern.compile("(?:Received|recieved|sent|Transferred|Payment of|credited with|withdrawal of)\\s*Rs\\.?\\s*([0-9,]+(?:\\.[0-9]{1,2})?)", Pattern.CASE_INSENSITIVE);
             Matcher m1 = p1.matcher(msg);
             if (m1.find()) {
                 return Double.parseDouble(m1.group(1).replace(",", ""));
             }
 
-            // Pattern 2: "Rs. 250 received", "Rs. 1000 transferred"
-            Pattern p2 = Pattern.compile("Rs\\.?\\s*([0-9,]+(?:\\.[0-9]{1,2})?)\\s*(?:received|transferred|sent|has been received|paid)", Pattern.CASE_INSENSITIVE);
+            // Pattern 2: "Rs. 250 received", "Rs 9,177.00 sent to", "Rs 60 received"
+            Pattern p2 = Pattern.compile("Rs\\.?\\s*([0-9,]+(?:\\.[0-9]{1,2})?)\\s*(?:received|recieved|transferred|sent|has been received|paid)", Pattern.CASE_INSENSITIVE);
             Matcher m2 = p2.matcher(msg);
             if (m2.find()) {
                 return Double.parseDouble(m2.group(1).replace(",", ""));
@@ -198,7 +206,7 @@ public class PaymentProcessor {
 
     private static String extractTrxId(String msg) {
         try {
-            Pattern p = Pattern.compile("(?:Trx\\s*ID|TID|Transaction\\s*ID|TXN\\s*ID|Trans\\s*ID)[:\\s]*([A-Za-z0-9]+)", Pattern.CASE_INSENSITIVE);
+            Pattern p = Pattern.compile("(?:Trx\\s*ID|TID|TxID|Transaction\\s*ID|TXN\\s*ID|Trans\\s*ID)[:\\s]*([A-Za-z0-9]+)", Pattern.CASE_INSENSITIVE);
             Matcher m = p.matcher(msg);
             if (m.find()) {
                 return m.group(1).trim();
@@ -219,7 +227,7 @@ public class PaymentProcessor {
             }
 
             // Check for Raast format: "received from MALIK NAVEED IQBAL AC ..." or "received from ALI KHAN in your"
-            Pattern pRaast = Pattern.compile("received\\s+from\\s+([A-Za-z\\s]{2,35}?)(?:\\s+AC|\\s+A/C|\\s+via|\\(|\\.|in your|TID|$)", Pattern.CASE_INSENSITIVE);
+            Pattern pRaast = Pattern.compile("(?:received|recieved)\\s+from\\s+([A-Za-z0-9\\s]{2,35}?)(?:\\s+AC|\\s+A/C|\\s+via|\\(|\\.|in your|TID|,|$)", Pattern.CASE_INSENSITIVE);
             Matcher mRaast = pRaast.matcher(msg);
             if (mRaast.find()) {
                 String name = mRaast.group(1).trim();
@@ -228,8 +236,8 @@ public class PaymentProcessor {
                 }
             }
 
-            // Check for standard names like "to Ali Khan" or "from Usman"
-            Pattern pName = Pattern.compile("(?:from|to)\\s+([A-Za-z\\s]{2,25})(?:\\s+AC|\\s+A/C|\\(|\\.|TID|Balance|$)", Pattern.CASE_INSENSITIVE);
+            // Check for standard names like "sent to RIZZLE PHARMACY," or "to Ali Khan"
+            Pattern pName = Pattern.compile("(?:from|to)\\s+([A-Za-z0-9\\s]{2,30}?)(?:\\s+AC|\\s+A/C|,|\\(|\\.|TID|Balance|$)", Pattern.CASE_INSENSITIVE);
             Matcher mName = pName.matcher(msg);
             if (mName.find()) {
                 String name = mName.group(1).trim();
@@ -240,6 +248,8 @@ public class PaymentProcessor {
         } catch (Exception e) {
             // ignore
         }
+        return isOutflow ? "Vendor / Recipient" : "Customer";
+    }
         return isOutflow ? "Vendor / Recipient" : "Customer";
     }
 }

@@ -2,6 +2,10 @@ package com.jazzcash.notifier;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.os.Build;
+import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
@@ -30,12 +34,24 @@ public class VoiceEngine {
         tts = new TextToSpeech(context, status -> {
             if (status == TextToSpeech.SUCCESS) {
                 isReady = true;
-                // Urdu or Hindi accent sounds most natural in Pakistan
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                            .build();
+                    tts.setAudioAttributes(audioAttributes);
+                }
+
+                // Urdu or Hindi voice accent sounds most natural in Pakistan
                 int res = tts.setLanguage(new Locale("hi", "IN"));
                 if (res == TextToSpeech.LANG_MISSING_DATA || res == TextToSpeech.LANG_NOT_SUPPORTED) {
                     tts.setLanguage(Locale.US);
                 }
-                tts.setSpeechRate(0.95f);
+
+                // Crisp pitch and steady pacing for maximum loudness and shop clarity
+                tts.setPitch(1.08f);
+                tts.setSpeechRate(0.92f);
             }
         });
     }
@@ -48,6 +64,34 @@ public class VoiceEngine {
     public void setSoundEnabled(boolean enabled) {
         SharedPreferences prefs = context.getSharedPreferences("RizzleShopPrefs", Context.MODE_PRIVATE);
         prefs.edit().putBoolean("sound_enabled", enabled).apply();
+    }
+
+    public int getVolumePercent() {
+        SharedPreferences prefs = context.getSharedPreferences("RizzleShopPrefs", Context.MODE_PRIVATE);
+        return prefs.getInt("voice_volume_percent", 100); // 100% Full Boost by default
+    }
+
+    public void setVolumePercent(int percent) {
+        if (percent < 0) percent = 0;
+        if (percent > 100) percent = 100;
+        SharedPreferences prefs = context.getSharedPreferences("RizzleShopPrefs", Context.MODE_PRIVATE);
+        prefs.edit().putInt("voice_volume_percent", percent).apply();
+        applyVolume();
+    }
+
+    public void applyVolume() {
+        try {
+            AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            if (am != null) {
+                int max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                int percent = getVolumePercent();
+                int target = Math.round((percent / 100.0f) * max);
+                if (target < 1 && percent > 0) target = 1;
+                am.setStreamVolume(AudioManager.STREAM_MUSIC, target, 0);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to apply volume: " + e.getMessage());
+        }
     }
 
     public void speakPayment(String channel, double amount) {
@@ -77,8 +121,21 @@ public class VoiceEngine {
     }
 
     public void speak(String text) {
+        if (!isSoundEnabled()) return;
+
+        // Force maximum target volume before speaking
+        applyVolume();
+
         if (tts != null && isReady) {
-            tts.speak(text, TextToSpeech.QUEUE_ADD, null, "PAYMENT_ANNOUNCE");
+            Bundle params = new Bundle();
+            params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f); // 100% max software gain
+            params.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                tts.speak(text, TextToSpeech.QUEUE_FLUSH, params, "PAYMENT_ANNOUNCE");
+            } else {
+                tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+            }
         } else {
             initTts();
         }

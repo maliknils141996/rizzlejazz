@@ -62,25 +62,33 @@ public class PaymentNotificationListener extends NotificationListenerService {
         String lowerContent = fullContent.toLowerCase();
 
         // 2. Identify Financial Transaction (Inflow OR Outflow)
-        boolean isIncoming = lowerContent.contains("received") ||
-                             lowerContent.contains("incoming payment") ||
-                             lowerContent.contains("has sent you") ||
-                             lowerContent.contains("sent you") ||
-                             lowerContent.contains("credited") ||
-                             lowerContent.contains("deposited");
-
-        boolean isOutflow = lowerContent.contains("you have sent") ||
+        boolean isOutflow = lowerContent.contains("sent to ") ||
+                            lowerContent.contains("you have sent") ||
                             lowerContent.contains("you sent") ||
                             lowerContent.contains("sent rs") ||
+                            lowerContent.contains("sent pkr") ||
                             lowerContent.contains("paid to") ||
                             lowerContent.contains("paid rs") ||
                             lowerContent.contains("payment to") ||
                             lowerContent.contains("transferred to") ||
+                            lowerContent.contains("transfer to") ||
+                            lowerContent.contains("will be credited") ||
                             (lowerContent.contains("payment of rs") && (lowerContent.contains("successful") || lowerContent.contains("to "))) ||
                             (lowerContent.contains("successful") && lowerContent.contains("to ")) ||
                             lowerContent.contains("cash withdrawal") ||
-                            lowerContent.contains("withdrawn rs") ||
+                            lowerContent.contains("withdrawn") ||
                             lowerContent.contains("debited");
+
+        boolean isIncoming = !isOutflow && (
+                             lowerContent.contains("received") ||
+                             lowerContent.contains("recieved") ||
+                             lowerContent.contains("incoming payment") ||
+                             lowerContent.contains("has sent you") ||
+                             lowerContent.contains("sent you") ||
+                             (lowerContent.contains("credited") && !lowerContent.contains("will be credited")) ||
+                             lowerContent.contains("deposited") ||
+                             lowerContent.contains("qr payment")
+        );
 
         // Filter out non-financial system notifications (OTP, login, balance check, etc.)
         if (lowerContent.contains("otp") ||

@@ -15,10 +15,14 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +31,7 @@ import androidx.core.content.ContextCompat;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -37,6 +42,8 @@ public class MainActivity extends Activity {
 
     private TextView tvLicenseBadge;
     private Button btnSoundToggle;
+    private SeekBar seekBarVolume;
+    private TextView tvVolumePercent;
     private LinearLayout llNotifBanner;
     private TextView tvBannerTitle;
     private TextView tvBannerSubtitle;
@@ -67,6 +74,11 @@ public class MainActivity extends Activity {
 
     private LinearLayout llEmptyState;
     private LinearLayout llTransactionsList;
+    private EditText etSearchTransactions;
+    private TextView btnClearSearch;
+
+    private String currentSearchQuery = "";
+    private List<DatabaseHelper.TransactionItem> loadedTransactions = new ArrayList<>();
 
     private int selectedFilterIndex = 0; // 0=Today, 1=Yesterday, 2=This Month, 3=Custom Calendar Date
     private String customSelectedDate = null; // "yyyy-MM-dd"
@@ -128,7 +140,16 @@ public class MainActivity extends Activity {
         llEmptyState = findViewById(R.id.llEmptyState);
         llTransactionsList = findViewById(R.id.llTransactionsList);
 
+        // Volume Controls
+        seekBarVolume = findViewById(R.id.seekBarVolume);
+        tvVolumePercent = findViewById(R.id.tvVolumePercent);
+
+        // Search Controls
+        etSearchTransactions = findViewById(R.id.etSearchTransactions);
+        btnClearSearch = findViewById(R.id.btnClearSearch);
+
         updateSoundToggleUI();
+        updateVolumeUI();
         updateLicenseBadge();
     }
 
@@ -156,9 +177,78 @@ public class MainActivity extends Activity {
             Toast.makeText(this, !current ? "Soundbox Voice Enabled" : "Soundbox Voice Muted", Toast.LENGTH_SHORT).show();
         });
 
+        // Volume SeekBar Listener
+        if (seekBarVolume != null) {
+            seekBarVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (fromUser) {
+                        VoiceEngine.getInstance(MainActivity.this).setVolumePercent(progress);
+                        updateVolumeText(progress);
+                    }
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {}
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    VoiceEngine.getInstance(MainActivity.this).applyVolume();
+                }
+            });
+        }
+
+        // Live Transaction Search Listener
+        if (etSearchTransactions != null) {
+            etSearchTransactions.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    currentSearchQuery = s.toString();
+                    if (btnClearSearch != null) {
+                        btnClearSearch.setVisibility(currentSearchQuery.isEmpty() ? View.GONE : View.VISIBLE);
+                    }
+                    renderTransactionsList();
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
+        }
+
+        if (btnClearSearch != null) {
+            btnClearSearch.setOnClickListener(v -> {
+                if (etSearchTransactions != null) {
+                    etSearchTransactions.setText("");
+                }
+            });
+        }
+
         btnEnableNotif.setOnClickListener(v -> handleAllowAllPermissions());
 
         btnShareSummary.setOnClickListener(v -> shareReportViaWhatsApp());
+    }
+
+    private void updateVolumeText(int progress) {
+        if (tvVolumePercent != null) {
+            if (progress >= 95) {
+                tvVolumePercent.setText(progress + "% (فل تیز)");
+            } else if (progress <= 30) {
+                tvVolumePercent.setText(progress + "% (دھیما)");
+            } else {
+                tvVolumePercent.setText(progress + "% (درمیانہ)");
+            }
+        }
+    }
+
+    private void updateVolumeUI() {
+        int vol = VoiceEngine.getInstance(this).getVolumePercent();
+        if (seekBarVolume != null) {
+            seekBarVolume.setProgress(vol);
+        }
+        updateVolumeText(vol);
     }
 
     private void setupFilterTabs() {
@@ -224,6 +314,7 @@ public class MainActivity extends Activity {
             return;
         }
 
+        updateVolumeUI();
         updatePermissionBanner();
         loadKhataData();
 
@@ -375,16 +466,48 @@ public class MainActivity extends Activity {
         tvEasyOutflow.setText("↑ Out: Rs. " + intCurrencyFmt.format(easyStats.totalOutflow));
 
         // 4. Live Transactions Feed (Showing both accounts together)
-        List<DatabaseHelper.TransactionItem> transactions = db.getTransactions(startDate, endDate, "all");
+        loadedTransactions = db.getTransactions(startDate, endDate, "all");
+        renderTransactionsList();
+    }
+
+    private void renderTransactionsList() {
+        if (llTransactionsList == null) return;
         llTransactionsList.removeAllViews();
 
-        if (transactions.isEmpty()) {
+        List<DatabaseHelper.TransactionItem> filtered = new ArrayList<>();
+        String query = currentSearchQuery.trim().toLowerCase();
+
+        for (DatabaseHelper.TransactionItem tx : loadedTransactions) {
+            if (query.isEmpty()) {
+                filtered.add(tx);
+            } else {
+                String amtStr = String.valueOf((long) tx.amount);
+                String amtFmt = currencyFmt.format(tx.amount).toLowerCase();
+                String channel = tx.channel != null ? tx.channel.toLowerCase() : "";
+                String tid = tx.trxId != null ? tx.trxId.toLowerCase() : "";
+                String sender = tx.sender != null ? tx.sender.toLowerCase() : "";
+                String recipient = tx.recipient != null ? tx.recipient.toLowerCase() : "";
+                String purpose = tx.purpose != null ? tx.purpose.toLowerCase() : "";
+
+                if (amtStr.contains(query) ||
+                    amtFmt.contains(query) ||
+                    channel.contains(query) ||
+                    tid.contains(query) ||
+                    sender.contains(query) ||
+                    recipient.contains(query) ||
+                    purpose.contains(query)) {
+                    filtered.add(tx);
+                }
+            }
+        }
+
+        if (filtered.isEmpty()) {
             llEmptyState.setVisibility(View.VISIBLE);
         } else {
             llEmptyState.setVisibility(View.GONE);
             LayoutInflater inflater = LayoutInflater.from(this);
 
-            for (DatabaseHelper.TransactionItem tx : transactions) {
+            for (DatabaseHelper.TransactionItem tx : filtered) {
                 View itemView = inflater.inflate(R.layout.item_transaction, llTransactionsList, false);
 
                 TextView tvTxChannel = itemView.findViewById(R.id.tvTxChannel);

@@ -47,15 +47,16 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v2.5.4-${{ github.run_number }}
-        name: PayVox v2.5.4 - Master VIP License & 1-Click Unified Permission Setup
+        tag_name: v2.6.0-${{ github.run_number }}
+        name: PayVox v2.6.0 - Merchant Outflow Fix, Soundbox Volume Slider & Search
         body: |
-          ### 💜 PayVox v2.5.4 - Master License & All-In-One Permission Flow
+          ### 💜 PayVox v2.6.0 - Major Merchant Upgrade
 
           ✅ **Key Upgrades:**
-          - 👑 **Universal Master Testing License:** Enter `PV-MASTER-2026-VIP` on ANY device to instantly activate 10 Years VIP testing access without generating keys!
-          - ⚡ **1-Click All-in-One Permissions:** A single `[⚡ تمام پرمیشنز الاؤ کریں]` button handles SMS runtime permission and directly launches Notification Access in sequence.
-          - 🎨 **Cleaner Layout:** Removed test button and streamlined top control bar with original voice toggle.
+          - 💸 **Accurate Outflow (Sent) Announcements:** Fixed issue where outbound bank transfers (e.g. *"Rs 9,177.00 sent to RIZZLE PHARMACY... will be credited within 30 minutes"*) were mistakenly announced as received. Now strictly announces: *"JazzCash se 9177 rupay send ho gaye hain"* and accurately subtracts it from the Net Khata!
+          - 🔊 **Soundbox Extra Loudness & In-App Volume Control:** Added a sleek in-app volume slider (0% to 100%). Pushes hardware speaker to maximum 100% Full Boost by default so you can hear announcements across the market.
+          - 🔍 **Real-Time Transaction Search Box:** Added a quick search bar above the live transactions feed. Type any amount (e.g. "60"), TID, or name to instantly filter transactions in real time!
+          - 👑 **Universal Master Testing License:** Enter `PV-MASTER-2026-VIP` on ANY device for instant 10-year VIP testing access.
 
           **Direct Download:** Click `PayVox.apk` below to download and install.
         draft: false
