@@ -30,7 +30,14 @@ jobs:
         cache-disabled: true
 
     - name: Build APK with Gradle
-      run: gradle assembleDebug --stacktrace --no-daemon
+      run: |
+        if ! gradle assembleDebug --stacktrace --no-daemon > build.log 2>&1; then
+          tail -n 80 build.log
+          ERR_MSG=$(tail -n 20 build.log | tr '\n' ' ')
+          echo "::error title=GradleBuildFailure::$ERR_MSG"
+          exit 1
+        fi
+        tail -n 20 build.log
       env:
         ANDROID_HOME: /usr/local/lib/android/sdk
 

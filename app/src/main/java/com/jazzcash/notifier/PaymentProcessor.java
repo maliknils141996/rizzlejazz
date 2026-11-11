@@ -250,6 +250,4 @@ public class PaymentProcessor {
         }
         return isOutflow ? "Vendor / Recipient" : "Customer";
     }
-        return isOutflow ? "Vendor / Recipient" : "Customer";
-    }
 }
