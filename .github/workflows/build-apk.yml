@@ -27,9 +27,10 @@ jobs:
       uses: gradle/actions/setup-gradle@v3
       with:
         gradle-version: '8.5'
+        cache-disabled: true
 
     - name: Build APK with Gradle
-      run: gradle assembleDebug --stacktrace
+      run: gradle assembleDebug --stacktrace --no-daemon
       env:
         ANDROID_HOME: /usr/local/lib/android/sdk
 
