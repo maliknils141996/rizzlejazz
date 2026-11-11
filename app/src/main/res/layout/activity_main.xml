@@ -81,46 +81,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- SOUNDBOX LOUDNESS & VOLUME CONTROL -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@drawable/card_white"
-            android:paddingHorizontal="14dp"
-            android:paddingVertical="10dp"
-            android:elevation="1dp"
-            android:layout_marginTop="14dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🔊 والیوم:"
-                android:textColor="#0F172A"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <SeekBar
-                android:id="@+id/seekBarVolume"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:max="100"
-                android:progress="100"
-                android:progressTint="#6D28D9"
-                android:thumbTint="#6D28D9"
-                android:layout_marginHorizontal="6dp" />
-
-            <TextView
-                android:id="@+id/tvVolumePercent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="100% (فل تیز)"
-                android:textColor="#6D28D9"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-        </LinearLayout>
 
         <!-- UNIFIED ALL-IN-ONE PERMISSIONS BANNER -->
         <LinearLayout

@@ -22,7 +22,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,8 +41,6 @@ public class MainActivity extends Activity {
 
     private TextView tvLicenseBadge;
     private Button btnSoundToggle;
-    private SeekBar seekBarVolume;
-    private TextView tvVolumePercent;
     private LinearLayout llNotifBanner;
     private TextView tvBannerTitle;
     private TextView tvBannerSubtitle;
@@ -140,16 +137,11 @@ public class MainActivity extends Activity {
         llEmptyState = findViewById(R.id.llEmptyState);
         llTransactionsList = findViewById(R.id.llTransactionsList);
 
-        // Volume Controls
-        seekBarVolume = findViewById(R.id.seekBarVolume);
-        tvVolumePercent = findViewById(R.id.tvVolumePercent);
-
         // Search Controls
         etSearchTransactions = findViewById(R.id.etSearchTransactions);
         btnClearSearch = findViewById(R.id.btnClearSearch);
 
         updateSoundToggleUI();
-        updateVolumeUI();
         updateLicenseBadge();
     }
 
@@ -176,27 +168,6 @@ public class MainActivity extends Activity {
             updateSoundToggleUI();
             Toast.makeText(this, !current ? "Soundbox Voice Enabled" : "Soundbox Voice Muted", Toast.LENGTH_SHORT).show();
         });
-
-        // Volume SeekBar Listener
-        if (seekBarVolume != null) {
-            seekBarVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    if (fromUser) {
-                        VoiceEngine.getInstance(MainActivity.this).setVolumePercent(progress);
-                        updateVolumeText(progress);
-                    }
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {}
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                    VoiceEngine.getInstance(MainActivity.this).applyVolume();
-                }
-            });
-        }
 
         // Live Transaction Search Listener
         if (etSearchTransactions != null) {
@@ -229,26 +200,6 @@ public class MainActivity extends Activity {
         btnEnableNotif.setOnClickListener(v -> handleAllowAllPermissions());
 
         btnShareSummary.setOnClickListener(v -> shareReportViaWhatsApp());
-    }
-
-    private void updateVolumeText(int progress) {
-        if (tvVolumePercent != null) {
-            if (progress >= 95) {
-                tvVolumePercent.setText(progress + "% (فل تیز)");
-            } else if (progress <= 30) {
-                tvVolumePercent.setText(progress + "% (دھیما)");
-            } else {
-                tvVolumePercent.setText(progress + "% (درمیانہ)");
-            }
-        }
-    }
-
-    private void updateVolumeUI() {
-        int vol = VoiceEngine.getInstance(this).getVolumePercent();
-        if (seekBarVolume != null) {
-            seekBarVolume.setProgress(vol);
-        }
-        updateVolumeText(vol);
     }
 
     private void setupFilterTabs() {
@@ -314,7 +265,6 @@ public class MainActivity extends Activity {
             return;
         }
 
-        updateVolumeUI();
         updatePermissionBanner();
         loadKhataData();
 

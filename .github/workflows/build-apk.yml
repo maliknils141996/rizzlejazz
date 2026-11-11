@@ -55,16 +55,17 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v2.6.0-${{ github.run_number }}
-        name: PayVox v2.6.0 - Merchant Outflow Fix, Soundbox Volume Slider & Search
+        tag_name: v2.6.1-${{ github.run_number }}
+        name: PayVox v2.6.1 - Super Loud High-Pitch Soundbox & Clean Merchant UI
         body: |
-          ### 💜 PayVox v2.6.0 - Major Merchant Upgrade
+          ### 💜 PayVox v2.6.1 - Super Loud Soundbox Upgrade
 
           ✅ **Key Upgrades:**
-          - 💸 **Accurate Outflow (Sent) Announcements:** Fixed issue where outbound bank transfers (e.g. *"Rs 9,177.00 sent to RIZZLE PHARMACY... will be credited within 30 minutes"*) were mistakenly announced as received. Now strictly announces: *"JazzCash se 9177 rupay send ho gaye hain"* and accurately subtracts it from the Net Khata!
-          - 🔊 **Soundbox Extra Loudness & In-App Volume Control:** Added a sleek in-app volume slider (0% to 100%). Pushes hardware speaker to maximum 100% Full Boost by default so you can hear announcements across the market.
-          - 🔍 **Real-Time Transaction Search Box:** Added a quick search bar above the live transactions feed. Type any amount (e.g. "60"), TID, or name to instantly filter transactions in real time!
-          - 👑 **Universal Master Testing License:** Enter `PV-MASTER-2026-VIP` on ANY device for instant 10-year VIP testing access.
+          - 🔊 **Extreme Loudness & High-Pitch Soundbox:** Switched audio routing from quiet system sonification to full Media loudspeaker stream (`USAGE_MEDIA` on `STREAM_MUSIC`) and boosted pitch to `1.20f` so the feminine voice penetrates loudly and crisply over shop/bazaar background noise. Auto-boosts phone hardware media, alarm, and notification volumes to 100% on every alert!
+          - 🎨 **Removed In-App Volume Slider:** Cleaned up UI per user request, keeping default volume permanently locked at 100% maximum.
+          - 🔍 **Real-Time Transaction Search Box:** Type any amount (e.g. "60"), TID, or name to instantly filter transactions in real time.
+          - 💸 **Accurate Outflow (Sent) Announcements:** Correctly announces *"JazzCash se [amount] rupay send ho gaye hain"* and subtracts from Net Khata.
+          - 👑 **Universal Master VIP Key:** `PV-MASTER-2026-VIP` for instant 10-year activation.
 
           **Direct Download:** Click `PayVox.apk` below to download and install.
         draft: false

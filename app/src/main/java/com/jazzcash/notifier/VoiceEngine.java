@@ -37,8 +37,9 @@ public class VoiceEngine {
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
                             .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                            .setLegacyStreamType(AudioManager.STREAM_MUSIC)
                             .build();
                     tts.setAudioAttributes(audioAttributes);
                 }
@@ -49,9 +50,9 @@ public class VoiceEngine {
                     tts.setLanguage(Locale.US);
                 }
 
-                // Crisp pitch and steady pacing for maximum loudness and shop clarity
-                tts.setPitch(1.08f);
-                tts.setSpeechRate(0.92f);
+                // Higher pitch (1.20f) penetrates ambient noise with louder acoustic perception
+                tts.setPitch(1.20f);
+                tts.setSpeechRate(0.95f);
             }
         });
     }
@@ -66,31 +67,29 @@ public class VoiceEngine {
         prefs.edit().putBoolean("sound_enabled", enabled).apply();
     }
 
-    public int getVolumePercent() {
-        SharedPreferences prefs = context.getSharedPreferences("RizzleShopPrefs", Context.MODE_PRIVATE);
-        return prefs.getInt("voice_volume_percent", 100); // 100% Full Boost by default
-    }
-
-    public void setVolumePercent(int percent) {
-        if (percent < 0) percent = 0;
-        if (percent > 100) percent = 100;
-        SharedPreferences prefs = context.getSharedPreferences("RizzleShopPrefs", Context.MODE_PRIVATE);
-        prefs.edit().putInt("voice_volume_percent", percent).apply();
-        applyVolume();
-    }
-
-    public void applyVolume() {
+    /**
+     * Boost hardware speaker volume to 100% MAXIMUM before speaking
+     */
+    public void boostMaxLoudness() {
         try {
             AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
             if (am != null) {
-                int max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-                int percent = getVolumePercent();
-                int target = Math.round((percent / 100.0f) * max);
-                if (target < 1 && percent > 0) target = 1;
-                am.setStreamVolume(AudioManager.STREAM_MUSIC, target, 0);
+                // Request temporary audio focus so background apps duck and full amplifier power goes to speech
+                am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+
+                // Set music/media stream to 100% absolute maximum
+                int maxMusic = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                am.setStreamVolume(AudioManager.STREAM_MUSIC, maxMusic, 0);
+
+                // Also boost alarm and notification volume to maximum as fallback
+                int maxAlarm = am.getStreamMaxVolume(AudioManager.STREAM_ALARM);
+                am.setStreamVolume(AudioManager.STREAM_ALARM, maxAlarm, 0);
+
+                int maxNotif = am.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION);
+                am.setStreamVolume(AudioManager.STREAM_NOTIFICATION, maxNotif, 0);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to apply volume: " + e.getMessage());
+            Log.e(TAG, "Failed to boost loudness: " + e.getMessage());
         }
     }
 
@@ -123,10 +122,13 @@ public class VoiceEngine {
     public void speak(String text) {
         if (!isSoundEnabled()) return;
 
-        // Force maximum target volume before speaking
-        applyVolume();
+        // Force maximum hardware speaker boost
+        boostMaxLoudness();
 
         if (tts != null && isReady) {
+            tts.setPitch(1.20f);
+            tts.setSpeechRate(0.95f);
+
             Bundle params = new Bundle();
             params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f); // 100% max software gain
             params.putString(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(AudioManager.STREAM_MUSIC));
