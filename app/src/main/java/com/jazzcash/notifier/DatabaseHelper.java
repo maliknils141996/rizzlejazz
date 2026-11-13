@@ -65,13 +65,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public synchronized boolean insertTransaction(String trxId, double amount, String type, String channel, String sender, String recipient, String purpose) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        // Avoid duplicate by Trx ID
-        Cursor c = db.rawQuery("SELECT id FROM " + TABLE_TX + " WHERE trx_id = ?", new String[]{trxId});
-        if (c.moveToFirst()) {
+        // Avoid duplicate by real Trx ID only
+        if (trxId != null && !trxId.trim().isEmpty() && !trxId.equalsIgnoreCase("N/A") && !trxId.startsWith("TX-GEN-")) {
+            trxId = trxId.trim();
+            Cursor c = db.rawQuery("SELECT id FROM " + TABLE_TX + " WHERE trx_id = ?", new String[]{trxId});
+            if (c.moveToFirst()) {
+                c.close();
+                return false;
+            }
             c.close();
-            return false;
+        } else {
+            // Generate unique guaranteed fallback ID so empty strings NEVER collide or fail SQLite UNIQUE constraint
+            trxId = "TX-GEN-" + System.currentTimeMillis() + "-" + ((int)(Math.random() * 9000) + 1000);
         }
-        c.close();
 
         ContentValues cv = new ContentValues();
         cv.put(COL_TRX_ID, trxId);

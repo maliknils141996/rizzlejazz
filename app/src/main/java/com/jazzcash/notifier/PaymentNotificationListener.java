@@ -104,15 +104,34 @@ public class PaymentNotificationListener extends NotificationListenerService {
             return;
         }
 
-        // 4. Identify Channel strictly (8558 = JazzCash, 3737 = Easypaisa)
+        // 4. Identify Channel (JazzCash, Easypaisa, or Pakistani Banking Apps)
         String senderContext;
         if (pkg.contains("mobilink") || pkg.contains("jazzcash") || title.toLowerCase().contains("jazzcash") || lowerContent.contains("jazzcash")) {
             senderContext = "8558";
         } else if (pkg.contains("telenor") || pkg.contains("easypaisa") || title.toLowerCase().contains("easypaisa") || lowerContent.contains("easypaisa")) {
             senderContext = "3737";
+        } else if (pkg.contains("meezan") || lowerContent.contains("meezan")) {
+            senderContext = "meezan";
+        } else if (pkg.contains("alfalah") || lowerContent.contains("alfalah")) {
+            senderContext = "alfalah";
+        } else if (pkg.contains("hbl") || lowerContent.contains("hbl")) {
+            senderContext = "hbl";
+        } else if (pkg.contains("ubl") || lowerContent.contains("ubl")) {
+            senderContext = "ubl";
+        } else if (pkg.contains("mcb") || lowerContent.contains("mcb")) {
+            senderContext = "mcb";
+        } else if (pkg.contains("allied") || pkg.contains("abl") || lowerContent.contains("allied bank")) {
+            senderContext = "allied";
+        } else if (pkg.contains("faysal") || lowerContent.contains("faysal")) {
+            senderContext = "faysal";
+        } else if (pkg.contains("askari") || lowerContent.contains("askari")) {
+            senderContext = "askari";
+        } else if (pkg.contains("sadapay") || lowerContent.contains("sadapay")) {
+            senderContext = "sadapay";
+        } else if (pkg.contains("nayapay") || lowerContent.contains("nayapay")) {
+            senderContext = "nayapay";
         } else {
-            Log.d(TAG, "Notification not from JazzCash or Easypaisa app: " + pkg);
-            return;
+            senderContext = "bank";
         }
 
         Log.d(TAG, "Valid incoming payment notification: " + fullContent);

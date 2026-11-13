@@ -93,30 +93,49 @@ public class VoiceEngine {
         }
     }
 
+    public static String getChannelVoiceName(String channel) {
+        if (channel == null) return "Bank";
+        switch (channel.toLowerCase().trim()) {
+            case "jazzcash": return "JazzCash";
+            case "easypaisa": return "Easypaisa";
+            case "meezan": return "Meezan Bank";
+            case "alfalah": return "Bank Alfalah";
+            case "hbl": return "HBL";
+            case "ubl": return "UBL";
+            case "mcb": return "MCB Bank";
+            case "allied":
+            case "abl": return "Allied Bank";
+            case "faysal": return "Faysal Bank";
+            case "askari": return "Askari Bank";
+            case "bop": return "Bank of Punjab";
+            case "jsbank":
+            case "js": return "JS Bank";
+            case "soneri": return "Soneri Bank";
+            case "sadapay": return "SadaPay";
+            case "nayapay": return "NayaPay";
+            case "bankislami": return "BankIslami";
+            case "albaraka": return "Al Baraka Bank";
+            case "dib": return "Dubai Islamic Bank";
+            case "scb": return "Standard Chartered";
+            case "bank": return "Bank";
+            default:
+                if (channel.length() > 1) {
+                    return Character.toUpperCase(channel.charAt(0)) + channel.substring(1);
+                }
+                return channel.toUpperCase();
+        }
+    }
+
     public void speakPayment(String channel, double amount) {
         if (!isSoundEnabled()) return;
-
-        final String text;
-        if ("easypaisa".equalsIgnoreCase(channel)) {
-            text = "Easypaisa par " + (long)amount + " rupay receive ho gaye hain";
-        } else {
-            text = "JazzCash par " + (long)amount + " rupay receive ho gaye hain";
-        }
-
-        speak(text);
+        String name = getChannelVoiceName(channel);
+        speak(name + " par " + (long)amount + " rupay receive ho gaye hain");
     }
 
     public void speakOutflow(String channel, double amount) {
         if (!isSoundEnabled()) return;
-
-        final String text;
-        if ("easypaisa".equalsIgnoreCase(channel)) {
-            text = "Easypaisa se " + (long)amount + " rupay send ho gaye hain";
-        } else {
-            text = "JazzCash se " + (long)amount + " rupay send ho gaye hain";
-        }
-
-        speak(text);
+        String name = getChannelVoiceName(channel);
+        speak(name + " se " + (long)amount + " rupay send ho gaye hain");
     }
 
     public void speak(String text) {

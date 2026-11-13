@@ -19,9 +19,12 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -71,11 +74,28 @@ public class MainActivity extends Activity {
 
     private LinearLayout llEmptyState;
     private LinearLayout llTransactionsList;
+    private Spinner spinnerBankFilter;
     private EditText etSearchTransactions;
     private TextView btnClearSearch;
 
+    private String selectedBankFilter = "all";
     private String currentSearchQuery = "";
     private List<DatabaseHelper.TransactionItem> loadedTransactions = new ArrayList<>();
+
+    public static class BankOption {
+        public final String key;
+        public final String label;
+
+        public BankOption(String key, String label) {
+            this.key = key;
+            this.label = label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+    }
 
     private int selectedFilterIndex = 0; // 0=Today, 1=Yesterday, 2=This Month, 3=Custom Calendar Date
     private String customSelectedDate = null; // "yyyy-MM-dd"
@@ -137,6 +157,10 @@ public class MainActivity extends Activity {
         llEmptyState = findViewById(R.id.llEmptyState);
         llTransactionsList = findViewById(R.id.llTransactionsList);
 
+        // Bank Dropdown Selector
+        spinnerBankFilter = findViewById(R.id.spinnerBankFilter);
+        setupBankFilterSpinner();
+
         // Search Controls
         etSearchTransactions = findViewById(R.id.etSearchTransactions);
         btnClearSearch = findViewById(R.id.btnClearSearch);
@@ -159,6 +183,47 @@ public class MainActivity extends Activity {
             btnSoundToggle.setText("🔇 Voice OFF");
             btnSoundToggle.setTextColor(Color.parseColor("#94A3B8"));
         }
+    }
+
+    private void setupBankFilterSpinner() {
+        if (spinnerBankFilter == null) return;
+
+        List<BankOption> options = new ArrayList<>();
+        options.add(new BankOption("all", "⭐ تمام اکاؤنٹس اور بینکس (All Banks & Wallets)"));
+        options.add(new BankOption("jazzcash", "🔴 JazzCash (جاز کیش)"));
+        options.add(new BankOption("easypaisa", "🟢 Easypaisa (ایزی پیسہ)"));
+        options.add(new BankOption("meezan", "🔵 Meezan Bank (میزان بینک)"));
+        options.add(new BankOption("alfalah", "🔵 Bank Alfalah (بینک الفلاح)"));
+        options.add(new BankOption("hbl", "🟢 HBL (حبیب بینک)"));
+        options.add(new BankOption("ubl", "🔵 UBL (یو بی ایل)"));
+        options.add(new BankOption("mcb", "🟠 MCB Bank (ایم سی بی)"));
+        options.add(new BankOption("allied", "🔵 Allied Bank ABL (الائیڈ بینک)"));
+        options.add(new BankOption("faysal", "🟣 Faysal Bank (فیصل بینک)"));
+        options.add(new BankOption("askari", "🟢 Askari Bank (عسکری بینک)"));
+        options.add(new BankOption("bop", "🔵 Bank of Punjab BOP (بینک آف پنجاب)"));
+        options.add(new BankOption("jsbank", "🔵 JS Bank (جے ایس بینک)"));
+        options.add(new BankOption("soneri", "🔵 Soneri Bank (سونیری بینک)"));
+        options.add(new BankOption("sadapay", "🟢 SadaPay (سادہ پے)"));
+        options.add(new BankOption("nayapay", "🟠 NayaPay (نیا پے)"));
+        options.add(new BankOption("bankislami", "🟢 BankIslami (بینک اسلامی)"));
+        options.add(new BankOption("albaraka", "🔵 Al Baraka Bank (البرکہ بینک)"));
+        options.add(new BankOption("dib", "🟢 Dubai Islamic Bank (دبئی اسلامک)"));
+        options.add(new BankOption("scb", "🔵 Standard Chartered (اسٹینڈرڈ چارٹرڈ)"));
+
+        ArrayAdapter<BankOption> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, options);
+        spinnerBankFilter.setAdapter(adapter);
+
+        spinnerBankFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                BankOption opt = options.get(position);
+                selectedBankFilter = opt.key;
+                loadKhataData();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
     }
 
     private void setupClickListeners() {
@@ -381,6 +446,41 @@ public class MainActivity extends Activity {
         updatePermissionBanner();
     }
 
+    public static class ChannelMeta {
+        public final String displayName;
+        public final int color;
+
+        public ChannelMeta(String displayName, String hexColor) {
+            this.displayName = displayName;
+            this.color = Color.parseColor(hexColor);
+        }
+    }
+
+    public static ChannelMeta getChannelMeta(String rawChannel) {
+        if (rawChannel == null) return new ChannelMeta("BANK", "#1E293B");
+        String ch = rawChannel.toLowerCase().trim();
+        if (ch.contains("jazzcash")) return new ChannelMeta("JAZZCASH", "#ED1C24");
+        if (ch.contains("easypaisa")) return new ChannelMeta("EASYPAISA", "#00A651");
+        if (ch.contains("meezan")) return new ChannelMeta("MEEZAN BANK", "#1A365D");
+        if (ch.contains("alfalah")) return new ChannelMeta("BANK ALFALAH", "#002D62");
+        if (ch.contains("hbl")) return new ChannelMeta("HBL", "#00593B");
+        if (ch.contains("ubl")) return new ChannelMeta("UBL", "#0072CE");
+        if (ch.contains("mcb")) return new ChannelMeta("MCB BANK", "#EA580C");
+        if (ch.contains("allied") || ch.contains("abl")) return new ChannelMeta("ALLIED BANK", "#0284C7");
+        if (ch.contains("faysal")) return new ChannelMeta("FAYSAL BANK", "#7E22CE");
+        if (ch.contains("askari")) return new ChannelMeta("ASKARI BANK", "#15803D");
+        if (ch.contains("bop") || ch.contains("punjab")) return new ChannelMeta("BANK OF PUNJAB", "#0369A1");
+        if (ch.contains("jsbank") || ch.contains("js")) return new ChannelMeta("JS BANK", "#2563EB");
+        if (ch.contains("soneri")) return new ChannelMeta("SONERI BANK", "#0284C7");
+        if (ch.contains("sadapay")) return new ChannelMeta("SADAPAY", "#0D9488");
+        if (ch.contains("nayapay")) return new ChannelMeta("NAYAPAY", "#F97316");
+        if (ch.contains("bankislami")) return new ChannelMeta("BANKISLAMI", "#16A34A");
+        if (ch.contains("albaraka")) return new ChannelMeta("AL BARAKA", "#1E3A8A");
+        if (ch.contains("dib")) return new ChannelMeta("DIB", "#059669");
+        if (ch.contains("scb")) return new ChannelMeta("STANDARD CHARTERED", "#0369A1");
+        return new ChannelMeta(rawChannel.toUpperCase(), "#334155");
+    }
+
     private void loadKhataData() {
         String[] dateRange = computeDateRange(selectedFilterIndex);
         String startDate = dateRange[0];
@@ -392,13 +492,17 @@ public class MainActivity extends Activity {
         else if (selectedFilterIndex == 2) periodBadge = "THIS MONTH";
         else if (selectedFilterIndex == 3) periodBadge = (customSelectedDate != null ? customSelectedDate : "CUSTOM DATE");
 
+        if (!"all".equalsIgnoreCase(selectedBankFilter)) {
+            periodBadge += " • " + VoiceEngine.getChannelVoiceName(selectedBankFilter).toUpperCase();
+        }
+
         tvPeriodTag.setText(periodBadge);
         tvDateRangeLabel.setText(label);
 
         DatabaseHelper db = DatabaseHelper.getInstance(this);
 
-        // 1. Overall Stats (Combined)
-        DatabaseHelper.KhataStats totalStats = db.getStats(startDate, endDate, "all");
+        // 1. Overall Stats for Selected Bank (or Combined)
+        DatabaseHelper.KhataStats totalStats = db.getStats(startDate, endDate, selectedBankFilter);
         tvNetBalance.setText("Rs. " + currencyFmt.format(totalStats.netBalance));
         tvTotalInflowSummary.setText("↓ In: Rs. " + intCurrencyFmt.format(totalStats.totalInflow) + " (" + totalStats.inflowCount + ")");
         tvTotalOutflowSummary.setText("↑ Out: Rs. " + intCurrencyFmt.format(totalStats.totalOutflow) + " (" + totalStats.outflowCount + ")");
@@ -415,8 +519,8 @@ public class MainActivity extends Activity {
         tvEasyInflow.setText("↓ In: Rs. " + intCurrencyFmt.format(easyStats.totalInflow));
         tvEasyOutflow.setText("↑ Out: Rs. " + intCurrencyFmt.format(easyStats.totalOutflow));
 
-        // 4. Live Transactions Feed (Showing both accounts together)
-        loadedTransactions = db.getTransactions(startDate, endDate, "all");
+        // 4. Live Transactions Feed for Selected Bank (or all)
+        loadedTransactions = db.getTransactions(startDate, endDate, selectedBankFilter);
         renderTransactionsList();
     }
 
@@ -468,14 +572,9 @@ public class MainActivity extends Activity {
                 TextView tvTxTime = itemView.findViewById(R.id.tvTxTime);
 
                 // Channel Badge Styling
-                String channel = tx.channel != null ? tx.channel.toLowerCase() : "jazzcash";
-                if (channel.contains("easypaisa")) {
-                    tvTxChannel.setText("EASYPAISA");
-                    tvTxChannel.setBackgroundColor(Color.parseColor("#00A651"));
-                } else {
-                    tvTxChannel.setText("JAZZCASH");
-                    tvTxChannel.setBackgroundColor(Color.parseColor("#ED1C24"));
-                }
+                ChannelMeta meta = getChannelMeta(tx.channel);
+                tvTxChannel.setText(meta.displayName);
+                tvTxChannel.setBackgroundColor(meta.color);
 
                 // Amount & Inflow/Outflow styling
                 boolean isInflow = "inflow".equalsIgnoreCase(tx.type);
@@ -554,26 +653,27 @@ public class MainActivity extends Activity {
         String[] dateRange = computeDateRange(selectedFilterIndex);
         DatabaseHelper db = DatabaseHelper.getInstance(this);
 
-        DatabaseHelper.KhataStats totalStats = db.getStats(dateRange[0], dateRange[1], "all");
+        DatabaseHelper.KhataStats currentStats = db.getStats(dateRange[0], dateRange[1], selectedBankFilter);
+        String channelTitle = VoiceEngine.getChannelVoiceName(selectedBankFilter);
+        if ("all".equalsIgnoreCase(selectedBankFilter)) {
+            channelTitle = "All Accounts (تمام اکاؤنٹس اور بینکس)";
+        }
+
         DatabaseHelper.KhataStats jazzStats = db.getStats(dateRange[0], dateRange[1], "jazzcash");
         DatabaseHelper.KhataStats easyStats = db.getStats(dateRange[0], dateRange[1], "easypaisa");
 
-        String report = "📊 *PayVox - Khata Summary*\n"
+        String report = "📊 *PayVox - Khata Summary Report*\n"
                 + "📅 *Period:* " + dateRange[2] + "\n"
+                + "🏦 *Account/Bank:* " + channelTitle + "\n"
                 + "------------------------------------\n"
-                + "🔴 *JazzCash:*\n"
-                + "   ↓ In: Rs. " + currencyFmt.format(jazzStats.totalInflow) + "\n"
-                + "   ↑ Out: Rs. " + currencyFmt.format(jazzStats.totalOutflow) + "\n"
-                + "   💰 Net: Rs. " + currencyFmt.format(jazzStats.netBalance) + "\n"
+                + "⭐ *SELECTED NET BALANCE: Rs. " + currencyFmt.format(currentStats.netBalance) + "*\n"
+                + "   ↓ Total Inflow: Rs. " + currencyFmt.format(currentStats.totalInflow) + " (" + currentStats.inflowCount + " txns)\n"
+                + "   ↑ Total Outflow: Rs. " + currencyFmt.format(currentStats.totalOutflow) + " (" + currentStats.outflowCount + " txns)\n"
                 + "------------------------------------\n"
-                + "🟢 *Easypaisa:*\n"
-                + "   ↓ In: Rs. " + currencyFmt.format(easyStats.totalInflow) + "\n"
-                + "   ↑ Out: Rs. " + currencyFmt.format(easyStats.totalOutflow) + "\n"
-                + "   💰 Net: Rs. " + currencyFmt.format(easyStats.netBalance) + "\n"
+                + "🔴 *JazzCash:* Rs. " + currencyFmt.format(jazzStats.netBalance) + "\n"
+                + "🟢 *Easypaisa:* Rs. " + currencyFmt.format(easyStats.netBalance) + "\n"
                 + "------------------------------------\n"
-                + "⭐ *TOTAL NET BALANCE: Rs. " + currencyFmt.format(totalStats.netBalance) + "*\n"
-                + "------------------------------------\n"
-                + "⚡ Generated by PayVox Smart Soundbox";
+                + "⚡ Generated by PayVox Smart Soundbox & Multi-Bank Khata";
 
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
