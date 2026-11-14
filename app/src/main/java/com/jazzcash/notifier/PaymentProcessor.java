@@ -68,14 +68,37 @@ public class PaymentProcessor {
         String normMessage = message.replaceAll("\\s+", " ").trim().toLowerCase();
         String contentHash = Integer.toHexString(normMessage.hashCode());
         long now = System.currentTimeMillis();
+        String amountKey = String.format(java.util.Locale.US, "%.2f", amount);
 
-        String dedupKey = channel + "_" + type + "_" + (long)amount + "_" + (hasExplicitTid ? trxId : contentHash);
-        Long lastSeen = processedAlertsCache.get(dedupKey);
-        if (lastSeen != null && (now - lastSeen) < DEDUP_WINDOW_MS) {
-            Log.d(TAG, "Duplicate alert detected (" + dedupKey + "). Skipping duplicate processing.");
+        // CHECK 1: Explicit TID Match (if a real TID/Ref is in the SMS)
+        if (hasExplicitTid) {
+            String tidKey = channel + "_" + type + "_tid_" + trxId;
+            Long lastSeenTid = processedAlertsCache.get(tidKey);
+            if (lastSeenTid != null && (now - lastSeenTid) < DEDUP_WINDOW_MS) {
+                Log.d(TAG, "Duplicate TID detected (" + tidKey + "). Dropping duplicate alert.");
+                return;
+            }
+            processedAlertsCache.put(tidKey, now);
+        }
+
+        // CHECK 2: Rapid-fire Channel + Type + Amount Suppression (within 25s)
+        // Eliminates duplicate triggers between SMS receiver and Notification listener for the exact same transaction
+        String rapidKey = channel + "_" + type + "_" + amountKey;
+        Long lastSeenRapid = processedAlertsCache.get(rapidKey);
+        if (lastSeenRapid != null && (now - lastSeenRapid) < DEDUP_WINDOW_MS) {
+            Log.d(TAG, "Rapid duplicate detected (" + rapidKey + ") within " + (now - lastSeenRapid) + "ms. Dropping duplicate.");
             return;
         }
-        processedAlertsCache.put(dedupKey, now);
+        processedAlertsCache.put(rapidKey, now);
+
+        // CHECK 3: Content Hash Dedup Key
+        String contentDedupKey = channel + "_" + type + "_" + contentHash;
+        Long lastSeenContent = processedAlertsCache.get(contentDedupKey);
+        if (lastSeenContent != null && (now - lastSeenContent) < DEDUP_WINDOW_MS) {
+            Log.d(TAG, "Duplicate content hash detected (" + contentDedupKey + "). Dropping duplicate.");
+            return;
+        }
+        processedAlertsCache.put(contentDedupKey, now);
 
         // 7. Extract Counterparty and Mentioned Destination Bank
         String counterparty = extractCounterparty(message, isOutflow);
@@ -137,7 +160,8 @@ public class PaymentProcessor {
             // Record Outflow on Source Wallet
             String sourceTrxId = "TX-" + sourceWallet.toUpperCase() + "-" + (long)amount + "-" + contentHash;
             db.insertTransaction(sourceTrxId, amount, "outflow", sourceWallet, "Shop (" + sourceName + ")", destName, "Transferred to " + destName);
-            processedAlertsCache.put(sourceWallet + "_outflow_" + (long)amount + "_" + contentHash, now);
+            processedAlertsCache.put(sourceWallet + "_outflow_" + amountKey, now);
+            processedAlertsCache.put(sourceWallet + "_outflow_" + contentHash, now);
 
             // Record Inflow on Destination Bank
             db.insertTransaction(trxId, amount, "inflow", channel, counterparty, "Shop (" + destName + ")", purpose);

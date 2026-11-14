@@ -55,14 +55,15 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v3.2.0-${{ github.run_number }}
-        name: PayVox v3.2.0 - Zero-Duplicate Fingerprint Dedup & Smart Self-Transfer Balancing
+        tag_name: v3.3.0-${{ github.run_number }}
+        name: PayVox v3.3.0 - Exactly-Once Announcement & All Banks & Wallets UI
         body: |
-          ### 💜 PayVox v3.2.0 Production Release
+          ### 💜 PayVox v3.3.0 Production Release
 
           ✅ **Key Upgrades in this Release:**
-          - 🚫 **100% Zero-Duplicate Fingerprint Deduplication**: Fixed the bug where messages without a TID (like Meezan 1 PKR alert) bypassed deduplication and announced/inserted twice. Every message is now fingerprint-deduplicated across SMS and Notification tray. Zero double entries!
-          - 🔄 **Smart Inter-Account Self-Transfer Balancing**: When money is moved from your own JazzCash to your Meezan Bank and JazzCash does not send an SMS, PayVox detects the transfer from the Meezan alert (`from NAVEED IQBAL JAZZCASH`), automatically records the JazzCash Outflow (- Rs. 1) and Meezan Inflow (+ Rs. 1), and announces both:
+          - 🎯 **Exactly-Once Voice Announcement**: Suppressed the dual-trigger between Telephony SMS and Notification tray. Every payment (JazzCash send, Meezan receive) now announces strictly ONE time. No repetition!
+          - 📱 **Clean "All Banks & Wallets" UI**: Removed the cluttered "Account / Bank:" prefix label above the dropdown. Dropdown now cleanly reads "All Banks & Wallets".
+          - 🔄 **Smart Inter-Account Self-Transfer**: Seamlessly balances JazzCash Outflow (- Rs. 1) and Meezan Inflow (+ Rs. 1) with exact 1-time voice:
             - *"JazzCash se 1 rupay send ho gaye hain"*
             - *"Meezan Bank par 1 rupay receive ho gaye hain"*
           - 👑 **Universal Master Testing License**: `PV-MASTER-2026-VIP` (10-Year VIP Active)

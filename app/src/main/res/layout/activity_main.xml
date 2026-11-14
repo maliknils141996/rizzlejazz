@@ -449,24 +449,15 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:background="@drawable/card_white"
-            android:paddingHorizontal="14dp"
+            android:paddingHorizontal="12dp"
             android:elevation="1dp"
             android:layout_marginTop="12dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🏦 Account / Bank:"
-                android:textColor="#0F172A"
-                android:textSize="12sp"
-                android:textStyle="bold" />
 
             <Spinner
                 android:id="@+id/spinnerBankFilter"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
                 android:background="@android:color/transparent"
                 android:spinnerMode="dropdown" />
 
@@ -475,7 +466,8 @@
                 android:layout_height="wrap_content"
                 android:text="▼"
                 android:textColor="#6D28D9"
-                android:textSize="11sp" />
+                android:textSize="12sp"
+                android:layout_marginStart="4dp" />
         </LinearLayout>
 
         <!-- TRANSACTION SEARCH BOX -->

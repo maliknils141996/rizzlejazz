@@ -226,7 +226,7 @@ public class MainActivity extends Activity {
         if (spinnerBankFilter == null) return;
 
         List<BankOption> options = new ArrayList<>();
-        options.add(new BankOption("all", "All Accounts & Banks", R.drawable.ic_bank_all));
+        options.add(new BankOption("all", "All Banks & Wallets", R.drawable.ic_bank_all));
         options.add(new BankOption("jazzcash", "JazzCash", R.drawable.ic_bank_jazzcash));
         options.add(new BankOption("easypaisa", "Easypaisa", R.drawable.ic_bank_easypaisa));
         options.add(new BankOption("ubl", "UBL", R.drawable.ic_bank_ubl));
@@ -709,7 +709,7 @@ public class MainActivity extends Activity {
         DatabaseHelper.KhataStats currentStats = db.getStats(dateRange[0], dateRange[1], selectedBankFilter);
         String channelTitle = VoiceEngine.getChannelVoiceName(selectedBankFilter);
         if ("all".equalsIgnoreCase(selectedBankFilter)) {
-            channelTitle = "All Accounts & Banks";
+            channelTitle = "All Banks & Wallets";
         }
 
         DatabaseHelper.KhataStats jazzStats = db.getStats(dateRange[0], dateRange[1], "jazzcash");

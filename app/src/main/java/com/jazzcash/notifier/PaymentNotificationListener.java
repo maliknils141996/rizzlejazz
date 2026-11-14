@@ -53,7 +53,8 @@ public class PaymentNotificationListener extends NotificationListenerService {
             body = textChar.toString();
         }
 
-        String fullContent = (title + " " + body).trim();
+        String messageContent = (body != null && !body.trim().isEmpty()) ? body.trim() : (title != null ? title.trim() : "");
+        String fullContent = ((title != null ? title : "") + " " + (body != null ? body : "")).trim();
         String lowerContent = fullContent.toLowerCase();
 
         // Filter out non-financial system notifications (OTP, login, balance check, etc.)
@@ -147,7 +148,7 @@ public class PaymentNotificationListener extends NotificationListenerService {
             }
         }
 
-        Log.d(TAG, "Valid financial (" + txType + ") notification from " + senderContext + ": " + fullContent);
-        PaymentProcessor.processIncomingText(this, senderContext, fullContent);
+        Log.d(TAG, "Valid financial (" + txType + ") notification from " + senderContext + ": " + messageContent);
+        PaymentProcessor.processIncomingText(this, senderContext, messageContent);
     }
 }
