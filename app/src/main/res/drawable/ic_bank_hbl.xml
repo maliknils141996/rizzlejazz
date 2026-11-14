@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="28dp"
+    android:height="28dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- HBL Signature Green circular background -->
+    <path
+        android:fillColor="#00593B"
+        android:pathData="M24,2A22,22 0 1,0 24,46A22,22 0 1,0 24,2Z" />
+    <!-- White H lettermark -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M16,14h5v7h6v-7h5v20h-5v-8h-6v8h-5V14z" />
+</vector>

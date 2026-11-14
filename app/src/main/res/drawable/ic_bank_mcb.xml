@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="28dp"
+    android:height="28dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- MCB Orange circular background -->
+    <path
+        android:fillColor="#EA580C"
+        android:pathData="M24,2A22,22 0 1,0 24,46A22,22 0 1,0 24,2Z" />
+    <!-- White M & C mark -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14,32V16h4l4,6 4,-6h4v16h-4V22.5l-4,6 -4,-6V32H14z" />
+</vector>

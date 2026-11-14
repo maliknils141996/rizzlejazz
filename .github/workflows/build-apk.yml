@@ -55,16 +55,17 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v2.8.0-${{ github.run_number }}
-        name: PayVox v2.8.0 - Outflow vs Inflow Fix, All English Bank UI & Active Bank Engine
+        tag_name: v2.9.0-${{ github.run_number }}
+        name: PayVox v2.9.0 - True Outflow/Inflow Precision, Real Bank Icons & Multi-Bank Routing
         body: |
-          ### 💜 PayVox v2.8.0 Production Release
+          ### 💜 PayVox v2.9.0 Production Release
 
           ✅ **Key Upgrades in this Release:**
-          - 📤 **Fixed JazzCash Outflow (Sent) Announcements:** Sent payments now properly announce *"se [amount] rupay send ho gaye hain"* instead of *"receive hue hain"*.
-          - 🏦 **All-English Bank Dropdown UI:** Removed all Urdu in parentheses from the bank selector for clean readability.
-          - ⚡ **Active Meezan & Pakistani Banks Engine:** Fixed sender priority & debit parsing so Meezan Bank and other bank transactions (send and receive) are immediately detected, announced, and recorded in Khata.
-          - 👑 **Universal Master Testing License:** `PV-MASTER-2026-VIP`
+          - 📤 **100% Outflow vs Inflow Precision**: Full resolution of Sent vs Received. Sending from JazzCash now unmistakably speaks *"JazzCash se [amount] rupay send ho gaye hain"*, and incoming speaks *"par [amount] rupay receive ho gaye hain"*.
+          - 🏦 **Meezan Bank (8079 / 8078 / 9060) Active**: Added Meezan Bank's official transaction alert shortcodes so incoming & outgoing payments via Raast & IBFT are instantly recognized, spoken, and saved.
+          - 🎨 **Real Original Bank Icons**: Replaced emoji dots and stars with real branded bank icon badges in the bank selector dropdown. Removed the star completely.
+          - 🛡️ **Non-Blocking Soundbox Voice**: Voice announcements never fail or get muted even across dual-party transactions with shared Raast Reference IDs.
+          - 👑 **Universal Master Testing License**: `PV-MASTER-2026-VIP` (10-Year VIP Active)
 
           **Direct Download:** Click `PayVox.apk` below to download and install.
         draft: false

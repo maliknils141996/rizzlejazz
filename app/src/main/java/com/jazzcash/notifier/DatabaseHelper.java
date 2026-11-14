@@ -14,7 +14,7 @@ import java.util.Locale;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "PayVoxShopKhata.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     public static final String TABLE_TX = "transactions";
     public static final String COL_ID = "id";
@@ -65,25 +65,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public synchronized boolean insertTransaction(String trxId, double amount, String type, String channel, String sender, String recipient, String purpose) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        // Avoid duplicate by real Trx ID only
+        String safeChannel = channel != null ? channel.toLowerCase() : "jazzcash";
+        String safeType = type != null ? type.toLowerCase() : "inflow";
+
+        // Avoid duplicate by real Trx ID + Channel + Type so cross-bank transfers (e.g. JazzCash send to Meezan receive) both record cleanly!
+        String storageTrxId;
         if (trxId != null && !trxId.trim().isEmpty() && !trxId.equalsIgnoreCase("N/A") && !trxId.startsWith("TX-GEN-")) {
             trxId = trxId.trim();
-            Cursor c = db.rawQuery("SELECT id FROM " + TABLE_TX + " WHERE trx_id = ?", new String[]{trxId});
+            storageTrxId = safeChannel + "_" + safeType + "_" + trxId;
+
+            Cursor c = db.rawQuery("SELECT id FROM " + TABLE_TX + " WHERE trx_id = ?", new String[]{storageTrxId});
             if (c.moveToFirst()) {
                 c.close();
                 return false;
             }
             c.close();
         } else {
-            // Generate unique guaranteed fallback ID so empty strings NEVER collide or fail SQLite UNIQUE constraint
             trxId = "TX-GEN-" + System.currentTimeMillis() + "-" + ((int)(Math.random() * 9000) + 1000);
+            storageTrxId = trxId;
         }
 
         ContentValues cv = new ContentValues();
-        cv.put(COL_TRX_ID, trxId);
+        cv.put(COL_TRX_ID, storageTrxId);
         cv.put(COL_AMOUNT, amount);
-        cv.put(COL_TYPE, type);
-        cv.put(COL_CHANNEL, channel != null ? channel.toLowerCase() : "jazzcash");
+        cv.put(COL_TYPE, safeType);
+        cv.put(COL_CHANNEL, safeChannel);
         cv.put(COL_SENDER, sender);
         cv.put(COL_RECIPIENT, recipient);
         cv.put(COL_PURPOSE, purpose);
@@ -91,7 +97,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
         cv.put(COL_CREATED_AT, now);
 
-        long res = db.insert(TABLE_TX, null, cv);
+        long res = db.insertWithOnConflict(TABLE_TX, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
         return res != -1;
     }
 

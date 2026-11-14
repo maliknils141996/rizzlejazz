@@ -19,10 +19,12 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -85,15 +87,50 @@ public class MainActivity extends Activity {
     public static class BankOption {
         public final String key;
         public final String label;
+        public final int iconResId;
 
-        public BankOption(String key, String label) {
+        public BankOption(String key, String label, int iconResId) {
             this.key = key;
             this.label = label;
+            this.iconResId = iconResId;
         }
 
         @Override
         public String toString() {
             return label;
+        }
+    }
+
+    public static class BankSpinnerAdapter extends ArrayAdapter<BankOption> {
+        private final LayoutInflater inflater;
+
+        public BankSpinnerAdapter(Context context, List<BankOption> items) {
+            super(context, 0, items);
+            this.inflater = LayoutInflater.from(context);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            return createItemView(position, convertView, parent);
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            return createItemView(position, convertView, parent);
+        }
+
+        private View createItemView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = inflater.inflate(R.layout.item_bank_spinner_row, parent, false);
+            }
+            BankOption item = getItem(position);
+            if (item != null) {
+                ImageView iv = convertView.findViewById(R.id.ivBankLogo);
+                TextView tv = convertView.findViewById(R.id.tvBankName);
+                if (iv != null) iv.setImageResource(item.iconResId);
+                if (tv != null) tv.setText(item.label);
+            }
+            return convertView;
         }
     }
 
@@ -189,28 +226,28 @@ public class MainActivity extends Activity {
         if (spinnerBankFilter == null) return;
 
         List<BankOption> options = new ArrayList<>();
-        options.add(new BankOption("all", "⭐ All Accounts & Banks"));
-        options.add(new BankOption("jazzcash", "🔴 JazzCash"));
-        options.add(new BankOption("easypaisa", "🟢 Easypaisa"));
-        options.add(new BankOption("meezan", "🔵 Meezan Bank"));
-        options.add(new BankOption("alfalah", "🔵 Bank Alfalah"));
-        options.add(new BankOption("hbl", "🟢 HBL"));
-        options.add(new BankOption("ubl", "🔵 UBL"));
-        options.add(new BankOption("mcb", "🟠 MCB Bank"));
-        options.add(new BankOption("allied", "🔵 Allied Bank"));
-        options.add(new BankOption("faysal", "🟣 Faysal Bank"));
-        options.add(new BankOption("askari", "🟢 Askari Bank"));
-        options.add(new BankOption("bop", "🔵 Bank of Punjab"));
-        options.add(new BankOption("jsbank", "🔵 JS Bank"));
-        options.add(new BankOption("soneri", "🔵 Soneri Bank"));
-        options.add(new BankOption("sadapay", "🟢 SadaPay"));
-        options.add(new BankOption("nayapay", "🟠 NayaPay"));
-        options.add(new BankOption("bankislami", "🟢 BankIslami"));
-        options.add(new BankOption("albaraka", "🔵 Al Baraka Bank"));
-        options.add(new BankOption("dib", "🟢 Dubai Islamic Bank"));
-        options.add(new BankOption("scb", "🔵 Standard Chartered"));
+        options.add(new BankOption("all", "All Accounts & Banks", R.drawable.ic_bank_all));
+        options.add(new BankOption("jazzcash", "JazzCash", R.drawable.ic_bank_jazzcash));
+        options.add(new BankOption("easypaisa", "Easypaisa", R.drawable.ic_bank_easypaisa));
+        options.add(new BankOption("meezan", "Meezan Bank", R.drawable.ic_bank_meezan));
+        options.add(new BankOption("alfalah", "Bank Alfalah", R.drawable.ic_bank_alfalah));
+        options.add(new BankOption("hbl", "HBL", R.drawable.ic_bank_hbl));
+        options.add(new BankOption("ubl", "UBL", R.drawable.ic_bank_ubl));
+        options.add(new BankOption("mcb", "MCB Bank", R.drawable.ic_bank_mcb));
+        options.add(new BankOption("allied", "Allied Bank", R.drawable.ic_bank_generic));
+        options.add(new BankOption("faysal", "Faysal Bank", R.drawable.ic_bank_generic));
+        options.add(new BankOption("askari", "Askari Bank", R.drawable.ic_bank_generic));
+        options.add(new BankOption("bop", "Bank of Punjab", R.drawable.ic_bank_generic));
+        options.add(new BankOption("jsbank", "JS Bank", R.drawable.ic_bank_generic));
+        options.add(new BankOption("soneri", "Soneri Bank", R.drawable.ic_bank_generic));
+        options.add(new BankOption("sadapay", "SadaPay", R.drawable.ic_bank_generic));
+        options.add(new BankOption("nayapay", "NayaPay", R.drawable.ic_bank_generic));
+        options.add(new BankOption("bankislami", "BankIslami", R.drawable.ic_bank_generic));
+        options.add(new BankOption("albaraka", "Al Baraka Bank", R.drawable.ic_bank_generic));
+        options.add(new BankOption("dib", "Dubai Islamic Bank", R.drawable.ic_bank_generic));
+        options.add(new BankOption("scb", "Standard Chartered", R.drawable.ic_bank_generic));
 
-        ArrayAdapter<BankOption> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, options);
+        BankSpinnerAdapter adapter = new BankSpinnerAdapter(this, options);
         spinnerBankFilter.setAdapter(adapter);
 
         spinnerBankFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -589,7 +626,12 @@ public class MainActivity extends Activity {
                 }
 
                 tvTxPurpose.setText(tx.purpose != null && !tx.purpose.isEmpty() ? tx.purpose : "Payment");
-                tvTxId.setText("TID: " + (tx.trxId != null ? tx.trxId : "N/A"));
+                String displayTid = tx.trxId != null ? tx.trxId : "N/A";
+                if (displayTid.contains("_")) {
+                    String[] parts = displayTid.split("_");
+                    displayTid = parts[parts.length - 1];
+                }
+                tvTxId.setText("TID: " + displayTid);
                 tvTxTime.setText(tx.createdAt != null ? tx.createdAt : "");
 
                 llTransactionsList.addView(itemView);

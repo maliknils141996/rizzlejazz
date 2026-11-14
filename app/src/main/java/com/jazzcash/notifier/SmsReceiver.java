@@ -52,18 +52,17 @@ public class SmsReceiver extends BroadcastReceiver {
         String m = finalMsg.toLowerCase();
 
         boolean isFinancialSender = s.contains("8558") || s.contains("3737") ||
-                s.contains("8222") || s.contains("2252") || s.contains("4250") ||
-                s.contains("8257") || s.contains("4722") || s.contains("2257") ||
-                s.contains("9225") || s.contains("8122") || s.contains("8489") ||
-                s.contains("8899") || s.contains("9922") || s.contains("8080") ||
-                s.contains("2242") || s.contains("9222") || s.contains("8282") ||
-                s.contains("jazz") || s.contains("easy") || s.contains("meezan") ||
-                s.contains("alfalah") || s.contains("bafl") || s.contains("hbl") ||
-                s.contains("ubl") || s.contains("mcb") || s.contains("allied") ||
-                s.contains("abl") || s.contains("faysal") || s.contains("fbl") ||
-                s.contains("askari") || s.contains("bop") || s.contains("js") ||
-                s.contains("soneri") || s.contains("sada") || s.contains("naya") ||
-                s.contains("bank") || s.contains("raast");
+                s.contains("8079") || s.contains("8078") || s.contains("9060") || s.contains("8222") ||
+                s.contains("2252") || s.contains("4250") || s.contains("8257") || s.contains("4722") ||
+                s.contains("2257") || s.contains("9225") || s.contains("8122") || s.contains("8489") ||
+                s.contains("8899") || s.contains("9922") || s.contains("8080") || s.contains("2242") ||
+                s.contains("9222") || s.contains("8282") || s.contains("7227") ||
+                s.contains("jazz") || s.contains("easy") || s.contains("meezan") || s.contains("mbl") ||
+                s.contains("alfalah") || s.contains("bafl") || s.contains("hbl") || s.contains("ubl") ||
+                s.contains("mcb") || s.contains("allied") || s.contains("abl") || s.contains("faysal") ||
+                s.contains("fbl") || s.contains("askari") || s.contains("bop") || s.contains("js") ||
+                s.contains("soneri") || s.contains("sada") || s.contains("naya") || s.contains("bank") ||
+                s.contains("raast");
 
         boolean hasFinancialContent = (m.contains("rs") || m.contains("pkr")) &&
                 (m.contains("received") || m.contains("recieved") || m.contains("credited") ||
