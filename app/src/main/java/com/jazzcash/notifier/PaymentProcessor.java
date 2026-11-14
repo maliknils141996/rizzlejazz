@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class PaymentProcessor {
     private static final String TAG = "PaymentProcessor";
 
-    // Deduplication cache: stores "channel_trxId" -> timestamp
+    // Deduplication cache: stores "channel_type_trxId" -> timestamp
     // Prevents double-announcements when both SMS and Notification fire for the exact same transaction
     private static final LruCache<String, Long> processedAlertsCache = new LruCache<>(150);
     private static final long DEDUP_WINDOW_MS = 25000; // 25 seconds window
@@ -19,7 +19,6 @@ public class PaymentProcessor {
     public static synchronized void processIncomingText(Context context, String sender, String message) {
         if (message == null || message.trim().isEmpty()) return;
         String lowerMsg = message.toLowerCase();
-        String lowerSender = sender != null ? sender.toLowerCase() : "";
 
         // 1. FILTER OUT PURE SYSTEM & UTILITY ALERTS (OTP, login, PIN warnings)
         if (lowerMsg.contains("otp") ||
@@ -32,7 +31,7 @@ public class PaymentProcessor {
             return;
         }
 
-        // Filter out MDR Cashback ONLY if it is a cashback notice (e.g. "Dear Merchant, you have received MDR Cashback of Rs 0.15")
+        // Filter out MDR Cashback ONLY if it is a cashback fee notice (e.g. "Dear Merchant, you have received MDR Cashback of Rs 0.15")
         // and NOT a real customer transfer.
         if (lowerMsg.contains("mdr cashback") ||
             (lowerMsg.startsWith("dear merchant, you have received") && lowerMsg.contains("cashback of rs 0.") && !lowerMsg.contains("via raast"))) {
@@ -40,51 +39,19 @@ public class PaymentProcessor {
             return;
         }
 
-        // 2. DETECT CHANNEL / BANK / WALLET
+        // 2. DETECT CHANNEL / BANK / WALLET (Sender shortcodes prioritized!)
         String channel = detectChannel(sender, message);
         if (channel == null) {
             channel = "jazzcash"; // safe default
         }
 
-        // 3. IDENTIFY TRANSACTION TYPE (INFLOW VS OUTFLOW)
-        // High priority: Check Outflow signals first (e.g. "sent to RIZZLE PHARMACY... will be credited within 30 minutes")
-        boolean isOutflow = lowerMsg.contains("sent to ") ||
-                            lowerMsg.contains("you have sent") ||
-                            lowerMsg.contains("you sent") ||
-                            lowerMsg.contains("sent rs") ||
-                            lowerMsg.contains("sent pkr") ||
-                            lowerMsg.contains("paid to") ||
-                            lowerMsg.contains("paid rs") ||
-                            lowerMsg.contains("transferred to") ||
-                            lowerMsg.contains("transfer to") ||
-                            lowerMsg.contains("will be credited") || // Outbound bank transfer confirmation
-                            (lowerMsg.contains("payment to") && !lowerMsg.contains("received") && !lowerMsg.contains("recieved")) ||
-                            (lowerMsg.contains("successful to") && !lowerMsg.contains("received") && !lowerMsg.contains("recieved")) ||
-                            lowerMsg.contains("cash withdrawal") ||
-                            lowerMsg.contains("withdrawn") ||
-                            lowerMsg.contains("debited");
-
-        boolean isInflow = !isOutflow && (
-                           lowerMsg.contains("received") ||
-                           lowerMsg.contains("recieved") || // JazzCash official SMS spelling: "You have Recieved Rs..."
-                           lowerMsg.contains("incoming payment") ||
-                           lowerMsg.contains("has sent you") ||
-                           lowerMsg.contains("sent you") ||
-                           (lowerMsg.contains("credited") && !lowerMsg.contains("will be credited")) ||
-                           lowerMsg.contains("deposited") ||
-                           lowerMsg.contains("qr payment")
-        );
-
-        String type;
-        if (isOutflow) {
-            type = "outflow";
-        } else if (isInflow) {
-            type = "inflow";
-        } else {
-            // Not a financial movement
+        // 3. IDENTIFY TRANSACTION TYPE (INFLOW VS OUTFLOW) WITH STRICT ACCURACY
+        String type = detectTransactionType(message);
+        if (type == null) {
             Log.d(TAG, "Message neither explicit inflow nor outflow. Ignoring: " + message);
             return;
         }
+        boolean isOutflow = "outflow".equalsIgnoreCase(type);
 
         // 4. Extract Amount
         double amount = extractAmount(message);
@@ -98,7 +65,7 @@ public class PaymentProcessor {
 
         // 6. DEDUPLICATION CHECK
         long now = System.currentTimeMillis();
-        // If a real TID exists, deduplicate against double alerts for that exact same TID
+        // If a real TID exists, deduplicate against double alerts for that exact same TID & type
         if (trxId != null && !trxId.isEmpty() && !trxId.startsWith("TX-GEN-")) {
             String dedupKey = channel + "_" + type + "_" + trxId;
             Long lastSeen = processedAlertsCache.get(dedupKey);
@@ -140,134 +107,207 @@ public class PaymentProcessor {
         }
     }
 
-    public static String detectChannel(String sender, String message) {
-        String s = sender != null ? sender.toLowerCase() : "";
-        String m = message != null ? message.toLowerCase() : "";
+    public static String detectTransactionType(String message) {
+        if (message == null) return null;
+        String lower = message.toLowerCase().trim();
 
-        // 1. Meezan Bank (8222, MeezanBank, Meezan)
-        if (s.contains("8222") || s.contains("meezan") || m.contains("meezan")) {
-            return "meezan";
+        // 1. OUTFLOW SIGNALS (Debit, Transfer Out, Sent, Paid, Withdraw)
+        boolean hasOutflowKeyword =
+                lower.contains("debited") ||
+                lower.contains("debit of") ||
+                lower.contains("cash withdrawal") ||
+                lower.contains("withdrawn") ||
+                lower.contains("will be credited") || // Outbound IBFT
+                lower.contains("paid to") ||
+                lower.contains("paid bill") ||
+                lower.contains("bill payment") ||
+                lower.contains("purchase at");
+
+        // Regex patterns for outflow:
+        boolean sentPattern = Pattern.compile("\\b(?:sent|send|sending)\\b.*\\bto\\b", Pattern.CASE_INSENSITIVE).matcher(lower).find();
+        boolean transferPattern = Pattern.compile("\\b(?:transferred|transfer)\\b.*\\bto\\b", Pattern.CASE_INSENSITIVE).matcher(lower).find();
+        boolean paymentToPattern = Pattern.compile("\\bpayment\\b.*\\bto\\b", Pattern.CASE_INSENSITIVE).matcher(lower).find();
+        boolean paidToPattern = Pattern.compile("\\bpaid\\b.*\\bto\\b", Pattern.CASE_INSENSITIVE).matcher(lower).find();
+        boolean youSentPattern = Pattern.compile("\\byou\\s+(?:have\\s+)?(?:successfully\\s+)?sent\\b", Pattern.CASE_INSENSITIVE).matcher(lower).find();
+        boolean hasBeenSent = lower.contains("has been sent") || lower.contains("is sent");
+
+        boolean isOutflow = hasOutflowKeyword || sentPattern || transferPattern || paymentToPattern || paidToPattern || youSentPattern || hasBeenSent;
+
+        // 2. INFLOW SIGNALS (Credit, Received, Deposited, Incoming)
+        boolean hasInflowKeyword =
+                lower.contains("received") ||
+                lower.contains("recieved") || // JazzCash official typo
+                lower.contains("incoming payment") ||
+                lower.contains("has sent you") ||
+                lower.contains("sent you") ||
+                lower.contains("deposited") ||
+                lower.contains("deposit of") ||
+                lower.contains("qr payment") ||
+                lower.contains("credited with") ||
+                lower.contains("credited by") ||
+                lower.contains("is credited") ||
+                lower.contains("has been credited") ||
+                lower.contains("credited to your account");
+
+        boolean receivedFromPattern = Pattern.compile("\\b(?:received|recieved)\\b.*\\bfrom\\b", Pattern.CASE_INSENSITIVE).matcher(lower).find();
+        boolean creditedFromPattern = Pattern.compile("\\bcredited\\b.*\\bfrom\\b", Pattern.CASE_INSENSITIVE).matcher(lower).find();
+
+        boolean isInflow = hasInflowKeyword || receivedFromPattern || creditedFromPattern;
+
+        // Conflict resolution: If both match, outflow takes priority when outgoing markers exist
+        // E.g. "Rs 9,177.00 sent to RIZZLE PHARMACY, Meezan A/C: ... will be credited within 30 minutes"
+        if (isOutflow && isInflow) {
+            if (sentPattern || transferPattern || paidToPattern || youSentPattern || lower.contains("debited") || lower.contains("will be credited")) {
+                return "outflow";
+            }
         }
-        // 2. Bank Alfalah (2252, Alfalah, BAFL)
-        if (s.contains("alfalah") || s.contains("bafl") || m.contains("alfalah") || m.contains("bank alfalah") || (s.contains("2252") && m.contains("alfalah"))) {
-            return "alfalah";
-        }
-        // 3. HBL (4250, HBL, Habib Bank)
-        if (s.contains("4250") || s.contains("hbl") || m.contains("hbl") || m.contains("habib bank")) {
-            return "hbl";
-        }
-        // 4. UBL (8257, UBL)
-        if (s.contains("8257") || s.contains("ubl") || m.contains("ubl digital") || m.contains("ubl a/c") || m.contains("ubl account") || (m.contains("ubl") && !m.contains("public"))) {
-            return "ubl";
-        }
-        // 5. MCB Bank (4722, MCB)
-        if (s.contains("4722") || s.contains("mcb") || m.contains("mcb")) {
-            return "mcb";
-        }
-        // 6. Allied Bank (ABL, 2252)
-        if (s.contains("allied") || s.contains("abl") || m.contains("allied bank") || m.contains("abl a/c")) {
-            return "allied";
-        }
-        // 7. Faysal Bank (2257, Faysal, FBL)
-        if (s.contains("2257") || s.contains("faysal") || s.contains("fbl") || m.contains("faysal bank")) {
-            return "faysal";
-        }
-        // 8. Askari Bank (9225, AKBL, Askari)
-        if (s.contains("9225") || s.contains("akbl") || s.contains("askari") || m.contains("askari bank")) {
-            return "askari";
-        }
-        // 9. Bank of Punjab (8122, BOP)
-        if (s.contains("8122") || s.contains("bop") || m.contains("bank of punjab")) {
-            return "bop";
-        }
-        // 10. JS Bank (8489, JS Bank)
-        if (s.contains("8489") || s.contains("jsbank") || s.contains("js bank") || m.contains("js bank")) {
-            return "jsbank";
-        }
-        // 11. Soneri Bank (8899, Soneri)
-        if (s.contains("8899") || s.contains("soneri") || m.contains("soneri bank")) {
-            return "soneri";
-        }
-        // 12. SadaPay (SadaPay, 9922)
-        if (s.contains("sadapay") || s.contains("9922") || m.contains("sadapay")) {
-            return "sadapay";
-        }
-        // 13. NayaPay (NayaPay, 8080)
-        if (s.contains("nayapay") || s.contains("8080") || m.contains("nayapay")) {
-            return "nayapay";
-        }
-        // 14. BankIslami (2242)
-        if (s.contains("2242") || s.contains("bankislami") || m.contains("bankislami") || m.contains("bank islami")) {
-            return "bankislami";
-        }
-        // 15. Al Baraka (9222)
-        if (s.contains("9222") || s.contains("albaraka") || m.contains("al baraka")) {
-            return "albaraka";
-        }
-        // 16. Dubai Islamic Bank (8282, DIB)
-        if (s.contains("8282") || s.contains("dib") || m.contains("dubai islamic")) {
-            return "dib";
-        }
-        // 17. Standard Chartered (SCB)
-        if (s.contains("scb") || m.contains("standard chartered")) {
-            return "scb";
-        }
-        // 18. JazzCash (8558, Mobilink, JazzCash)
-        if (s.contains("8558") || s.contains("jazzcash") || s.contains("mobilink") || m.contains("jazzcash") || m.contains("till id")) {
+
+        if (isOutflow) return "outflow";
+        if (isInflow) return "inflow";
+
+        return null;
+    }
+
+    public static String detectChannel(String sender, String message) {
+        String s = sender != null ? sender.toLowerCase().trim() : "";
+        String m = message != null ? message.toLowerCase().trim() : "";
+
+        // PRIORITY 1: OFFICIAL SENDER SHORTCODES & HEADER MASKS
+        if (s.contains("8558") || s.contains("jazzcash") || s.contains("mobilink") || s.startsWith("jc")) {
             return "jazzcash";
         }
-        // 19. Easypaisa (3737, Telenor, Easypaisa)
-        if (s.contains("3737") || s.contains("easypaisa") || s.contains("telenor") || m.contains("easypaisa")) {
+        if (s.contains("3737") || s.contains("easypaisa") || s.contains("telenor") || s.startsWith("ep")) {
             return "easypaisa";
         }
-
-        // Generic Raast / Bank
-        if (m.contains("raast") || m.contains("a/c") || m.contains("account") || m.contains("acct")) {
-            return "bank";
+        if (s.contains("8222") || s.contains("meezan")) {
+            return "meezan";
         }
+        if (s.contains("2252") || s.contains("alfalah") || s.contains("bafl")) {
+            if (m.contains("allied") || m.contains("abl")) {
+                return "allied";
+            }
+            return "alfalah";
+        }
+        if (s.contains("4250") || s.contains("hbl")) {
+            return "hbl";
+        }
+        if (s.contains("8257") || s.contains("ubl")) {
+            return "ubl";
+        }
+        if (s.contains("4722") || s.contains("mcb")) {
+            return "mcb";
+        }
+        if (s.contains("allied") || s.contains("abl")) {
+            return "allied";
+        }
+        if (s.contains("2257") || s.contains("faysal") || s.contains("fbl")) {
+            return "faysal";
+        }
+        if (s.contains("9225") || s.contains("askari") || s.contains("akbl")) {
+            return "askari";
+        }
+        if (s.contains("8122") || s.contains("bop")) {
+            return "bop";
+        }
+        if (s.contains("8489") || s.contains("jsbank") || s.contains("js bank")) {
+            return "jsbank";
+        }
+        if (s.contains("8899") || s.contains("soneri")) {
+            return "soneri";
+        }
+        if (s.contains("9922") || s.contains("sadapay")) {
+            return "sadapay";
+        }
+        if (s.contains("8080") || s.contains("nayapay")) {
+            return "nayapay";
+        }
+        if (s.contains("2242") || s.contains("bankislami")) {
+            return "bankislami";
+        }
+        if (s.contains("9222") || s.contains("albaraka")) {
+            return "albaraka";
+        }
+        if (s.contains("8282") || s.contains("dib")) {
+            return "dib";
+        }
+        if (s.contains("scb") || s.contains("standard chartered")) {
+            return "scb";
+        }
+
+        // PRIORITY 2: SENDER WAS GENERIC / UNIDENTIFIED -> CHECK MESSAGE CONTENT
+        if (m.contains("jazzcash") || m.contains("till id")) return "jazzcash";
+        if (m.contains("easypaisa")) return "easypaisa";
+        if (m.contains("meezan bank") || m.contains("meezan account") || m.contains("meezan a/c")) return "meezan";
+        if (m.contains("bank alfalah") || m.contains("alfalah")) return "alfalah";
+        if (m.contains("habib bank") || m.contains("hbl alert") || m.contains("hbl a/c")) return "hbl";
+        if (m.contains("ubl digital") || m.contains("ubl alert") || m.contains("ubl a/c")) return "ubl";
+        if (m.contains("mcb bank") || m.contains("mcb alert")) return "mcb";
+        if (m.contains("allied bank") || m.contains("abl alert")) return "allied";
+        if (m.contains("faysal bank")) return "faysal";
+        if (m.contains("askari bank")) return "askari";
+        if (m.contains("bank of punjab") || m.contains("bop")) return "bop";
+        if (m.contains("js bank") || m.contains("jsbank")) return "jsbank";
+        if (m.contains("soneri bank")) return "soneri";
+        if (m.contains("sadapay")) return "sadapay";
+        if (m.contains("nayapay")) return "nayapay";
+        if (m.contains("bankislami") || m.contains("bank islami")) return "bankislami";
+        if (m.contains("al baraka") || m.contains("albaraka")) return "albaraka";
+        if (m.contains("dubai islamic") || m.contains("dib alert")) return "dib";
+        if (m.contains("standard chartered")) return "scb";
+
+        if (m.contains("meezan")) return "meezan";
+        if (m.contains("hbl")) return "hbl";
+        if (m.contains("ubl")) return "ubl";
+        if (m.contains("mcb")) return "mcb";
+        if (m.contains("raast")) return "bank";
 
         return "jazzcash";
     }
 
-    private static double extractAmount(String msg) {
+    public static double extractAmount(String msg) {
+        if (msg == null) return 0.0;
         try {
             // Pattern 1: Action followed by Rs/PKR
-            // E.g. "Received Rs. 1,500.00", "Recieved Rs 60.00", "credited with PKR 5000", "sent Rs. 500", "Payment of Rs 1000"
-            Pattern p1 = Pattern.compile("(?:Received|recieved|sent|Transferred|Payment of|credited with|withdrawal of|debited with|deposited)\\s*(?:Rs\\.?|PKR)\\s*([0-9,]+(?:\\.[0-9]{1,2})?)", Pattern.CASE_INSENSITIVE);
+            // E.g. "Received Rs. 1,500.00", "Recieved Rs 60.00", "debited by Rs. 5,000", "sent Rs. 500"
+            Pattern p1 = Pattern.compile("(?:Received|recieved|sent|Transferred|Payment of|credited with|credited by|credited for|withdrawal of|debited with|debited by|debited for|debited from|deposited)\\s*(?:Rs\\.?|PKR)?\\s*([0-9,]+(?:\\.[0-9]{1,2})?)", Pattern.CASE_INSENSITIVE);
             Matcher m1 = p1.matcher(msg);
             if (m1.find()) {
-                return Double.parseDouble(m1.group(1).replace(",", ""));
+                double val = parseCleanDouble(m1.group(1));
+                if (val > 0.40) return val;
             }
 
-            // Pattern 2: Rs/PKR followed by action
+            // Pattern 2: Rs/PKR followed by number and action
             // E.g. "Rs 60 received", "PKR 5,000.00 credited", "Rs 9,177.00 sent to", "QR Payment Rs 60 received"
             Pattern p2 = Pattern.compile("(?:Rs\\.?|PKR)\\s*([0-9,]+(?:\\.[0-9]{1,2})?)\\s*(?:received|recieved|transferred|sent|has been received|paid|credited|debited)", Pattern.CASE_INSENSITIVE);
             Matcher m2 = p2.matcher(msg);
             if (m2.find()) {
-                return Double.parseDouble(m2.group(1).replace(",", ""));
+                double val = parseCleanDouble(m2.group(1));
+                if (val > 0.40) return val;
             }
 
-            // Pattern 3: Bank phrasing: "credited by PKR 5,000" or "debited by Rs 2000"
-            Pattern p3 = Pattern.compile("(?:credited|debited|received|recieved)\\s+(?:by|with|for)?\\s*(?:Rs\\.?|PKR)\\s*([0-9,]+(?:\\.[0-9]{1,2})?)", Pattern.CASE_INSENSITIVE);
+            // Pattern 3: Bank debit/credit phrasing (e.g. "credited by PKR 5,000" or "is debited with PKR 2,500")
+            Pattern p3 = Pattern.compile("(?:credited|debited)\\s+(?:by|with|for|from)?\\s*(?:Rs\\.?|PKR)?\\s*([0-9,]+(?:\\.[0-9]{1,2})?)", Pattern.CASE_INSENSITIVE);
             Matcher m3 = p3.matcher(msg);
             if (m3.find()) {
-                return Double.parseDouble(m3.group(1).replace(",", ""));
+                double val = parseCleanDouble(m3.group(1));
+                if (val > 0.40) return val;
             }
 
-            // Pattern 4: "QR Payment Rs 60"
-            Pattern p4 = Pattern.compile("(?:QR\\s*Payment|Payment)\\s*(?:Rs\\.?|PKR)?\\s*([0-9,]+(?:\\.[0-9]{1,2})?)", Pattern.CASE_INSENSITIVE);
+            // Pattern 4: "QR Payment Rs 60" or "Transfer of Rs. 5,000"
+            Pattern p4 = Pattern.compile("(?:QR\\s*Payment|Payment|Transfer)\\s*(?:of)?\\s*(?:Rs\\.?|PKR)?\\s*([0-9,]+(?:\\.[0-9]{1,2})?)", Pattern.CASE_INSENSITIVE);
             Matcher m4 = p4.matcher(msg);
             if (m4.find()) {
-                return Double.parseDouble(m4.group(1).replace(",", ""));
+                double val = parseCleanDouble(m4.group(1));
+                if (val > 0.40) return val;
             }
 
             // Pattern 5: General Rs/PKR fallback
             Pattern p5 = Pattern.compile("(?:Rs\\.?|PKR)\\s*([0-9,]+(?:\\.[0-9]{1,2})?)", Pattern.CASE_INSENSITIVE);
             Matcher m5 = p5.matcher(msg);
             while (m5.find()) {
-                double val = Double.parseDouble(m5.group(1).replace(",", ""));
-                // If it's a real amount (not a fee like 0.15)
-                if (val >= 0.50) {
+                double val = parseCleanDouble(m5.group(1));
+                // Only consider real transactions (skip fees like 0.15)
+                if (val >= 1.0) {
                     return val;
                 }
             }
@@ -275,6 +315,11 @@ public class PaymentProcessor {
             Log.e(TAG, "Error parsing amount: " + e.getMessage());
         }
         return 0.0;
+    }
+
+    private static double parseCleanDouble(String val) {
+        if (val == null) return 0.0;
+        return Double.parseDouble(val.replace(",", "").trim());
     }
 
     private static String extractTrxId(String msg) {

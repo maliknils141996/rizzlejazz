@@ -55,18 +55,16 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v2.7.0-${{ github.run_number }}
-        name: PayVox v2.7.0 - Zero Missed Payments, All Pakistan Banks & Bank Filter Dropdown
+        tag_name: v2.8.0-${{ github.run_number }}
+        name: PayVox v2.8.0 - Outflow vs Inflow Fix, All English Bank UI & Active Bank Engine
         body: |
-          ### 💜 PayVox v2.7.0 - Major Pakistani Banks & Zero-Missed Payments Upgrade
+          ### 💜 PayVox v2.8.0 Production Release
 
           ✅ **Key Upgrades in this Release:**
-          - 🛡️ **Zero Missed Payments Engine:** Completely eliminated payment drops. Refined spam filter so JazzCash & Easypaisa SMS mentioning reward/loyalty points are never discarded; resolved empty TID SQLite collisions; and allowed rapid back-to-back payments.
-          - 🏦 **All Pakistan Banks & Wallets:** Added full support for Pakistani commercial and Islamic banks: Meezan Bank, Bank Alfalah, HBL, UBL, MCB, Allied Bank (ABL), Faysal Bank, Askari Bank, Bank of Punjab (BOP), JS Bank, Soneri Bank, SadaPay, NayaPay, BankIslami, Al Baraka, Dubai Islamic (DIB), Standard Chartered, and Raast!
-          - 📢 **Instant Spoken Bank Announcements:** Distinct voice announcements for each bank (e.g. *"Meezan Bank par 5000 rupay receive ho gaye hain"*, *"Bank Alfalah par 2500 rupay receive ho gaye hain"*, etc.).
-          - 🔽 **Bank Filter Dropdown (ڈراپ ڈاؤن مینو):** A dedicated dropdown menu allows merchants to inspect individual bank ledgers or combined totals with one tap.
-          - 🎨 **Distinct Branded Bank Badges:** Live feed clearly highlights the origin bank in official brand colors.
-          - 👑 **Universal Master Testing License:** Enter `PV-MASTER-2026-VIP` for instant 10-year VIP activation.
+          - 📤 **Fixed JazzCash Outflow (Sent) Announcements:** Sent payments now properly announce *"se [amount] rupay send ho gaye hain"* instead of *"receive hue hain"*.
+          - 🏦 **All-English Bank Dropdown UI:** Removed all Urdu in parentheses from the bank selector for clean readability.
+          - ⚡ **Active Meezan & Pakistani Banks Engine:** Fixed sender priority & debit parsing so Meezan Bank and other bank transactions (send and receive) are immediately detected, announced, and recorded in Khata.
+          - 👑 **Universal Master Testing License:** `PV-MASTER-2026-VIP`
 
           **Direct Download:** Click `PayVox.apk` below to download and install.
         draft: false

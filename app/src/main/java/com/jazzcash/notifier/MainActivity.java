@@ -189,26 +189,26 @@ public class MainActivity extends Activity {
         if (spinnerBankFilter == null) return;
 
         List<BankOption> options = new ArrayList<>();
-        options.add(new BankOption("all", "⭐ تمام اکاؤنٹس اور بینکس (All Banks & Wallets)"));
-        options.add(new BankOption("jazzcash", "🔴 JazzCash (جاز کیش)"));
-        options.add(new BankOption("easypaisa", "🟢 Easypaisa (ایزی پیسہ)"));
-        options.add(new BankOption("meezan", "🔵 Meezan Bank (میزان بینک)"));
-        options.add(new BankOption("alfalah", "🔵 Bank Alfalah (بینک الفلاح)"));
-        options.add(new BankOption("hbl", "🟢 HBL (حبیب بینک)"));
-        options.add(new BankOption("ubl", "🔵 UBL (یو بی ایل)"));
-        options.add(new BankOption("mcb", "🟠 MCB Bank (ایم سی بی)"));
-        options.add(new BankOption("allied", "🔵 Allied Bank ABL (الائیڈ بینک)"));
-        options.add(new BankOption("faysal", "🟣 Faysal Bank (فیصل بینک)"));
-        options.add(new BankOption("askari", "🟢 Askari Bank (عسکری بینک)"));
-        options.add(new BankOption("bop", "🔵 Bank of Punjab BOP (بینک آف پنجاب)"));
-        options.add(new BankOption("jsbank", "🔵 JS Bank (جے ایس بینک)"));
-        options.add(new BankOption("soneri", "🔵 Soneri Bank (سونیری بینک)"));
-        options.add(new BankOption("sadapay", "🟢 SadaPay (سادہ پے)"));
-        options.add(new BankOption("nayapay", "🟠 NayaPay (نیا پے)"));
-        options.add(new BankOption("bankislami", "🟢 BankIslami (بینک اسلامی)"));
-        options.add(new BankOption("albaraka", "🔵 Al Baraka Bank (البرکہ بینک)"));
-        options.add(new BankOption("dib", "🟢 Dubai Islamic Bank (دبئی اسلامک)"));
-        options.add(new BankOption("scb", "🔵 Standard Chartered (اسٹینڈرڈ چارٹرڈ)"));
+        options.add(new BankOption("all", "⭐ All Accounts & Banks"));
+        options.add(new BankOption("jazzcash", "🔴 JazzCash"));
+        options.add(new BankOption("easypaisa", "🟢 Easypaisa"));
+        options.add(new BankOption("meezan", "🔵 Meezan Bank"));
+        options.add(new BankOption("alfalah", "🔵 Bank Alfalah"));
+        options.add(new BankOption("hbl", "🟢 HBL"));
+        options.add(new BankOption("ubl", "🔵 UBL"));
+        options.add(new BankOption("mcb", "🟠 MCB Bank"));
+        options.add(new BankOption("allied", "🔵 Allied Bank"));
+        options.add(new BankOption("faysal", "🟣 Faysal Bank"));
+        options.add(new BankOption("askari", "🟢 Askari Bank"));
+        options.add(new BankOption("bop", "🔵 Bank of Punjab"));
+        options.add(new BankOption("jsbank", "🔵 JS Bank"));
+        options.add(new BankOption("soneri", "🔵 Soneri Bank"));
+        options.add(new BankOption("sadapay", "🟢 SadaPay"));
+        options.add(new BankOption("nayapay", "🟠 NayaPay"));
+        options.add(new BankOption("bankislami", "🟢 BankIslami"));
+        options.add(new BankOption("albaraka", "🔵 Al Baraka Bank"));
+        options.add(new BankOption("dib", "🟢 Dubai Islamic Bank"));
+        options.add(new BankOption("scb", "🔵 Standard Chartered"));
 
         ArrayAdapter<BankOption> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, options);
         spinnerBankFilter.setAdapter(adapter);
@@ -656,7 +656,7 @@ public class MainActivity extends Activity {
         DatabaseHelper.KhataStats currentStats = db.getStats(dateRange[0], dateRange[1], selectedBankFilter);
         String channelTitle = VoiceEngine.getChannelVoiceName(selectedBankFilter);
         if ("all".equalsIgnoreCase(selectedBankFilter)) {
-            channelTitle = "All Accounts (تمام اکاؤنٹس اور بینکس)";
+            channelTitle = "All Accounts & Banks";
         }
 
         DatabaseHelper.KhataStats jazzStats = db.getStats(dateRange[0], dateRange[1], "jazzcash");

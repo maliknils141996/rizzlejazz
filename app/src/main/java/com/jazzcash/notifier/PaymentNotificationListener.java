@@ -61,35 +61,6 @@ public class PaymentNotificationListener extends NotificationListenerService {
         String fullContent = (title + " " + body).trim();
         String lowerContent = fullContent.toLowerCase();
 
-        // 2. Identify Financial Transaction (Inflow OR Outflow)
-        boolean isOutflow = lowerContent.contains("sent to ") ||
-                            lowerContent.contains("you have sent") ||
-                            lowerContent.contains("you sent") ||
-                            lowerContent.contains("sent rs") ||
-                            lowerContent.contains("sent pkr") ||
-                            lowerContent.contains("paid to") ||
-                            lowerContent.contains("paid rs") ||
-                            lowerContent.contains("payment to") ||
-                            lowerContent.contains("transferred to") ||
-                            lowerContent.contains("transfer to") ||
-                            lowerContent.contains("will be credited") ||
-                            (lowerContent.contains("payment of rs") && (lowerContent.contains("successful") || lowerContent.contains("to "))) ||
-                            (lowerContent.contains("successful") && lowerContent.contains("to ")) ||
-                            lowerContent.contains("cash withdrawal") ||
-                            lowerContent.contains("withdrawn") ||
-                            lowerContent.contains("debited");
-
-        boolean isIncoming = !isOutflow && (
-                             lowerContent.contains("received") ||
-                             lowerContent.contains("recieved") ||
-                             lowerContent.contains("incoming payment") ||
-                             lowerContent.contains("has sent you") ||
-                             lowerContent.contains("sent you") ||
-                             (lowerContent.contains("credited") && !lowerContent.contains("will be credited")) ||
-                             lowerContent.contains("deposited") ||
-                             lowerContent.contains("qr payment")
-        );
-
         // Filter out non-financial system notifications (OTP, login, balance check, etc.)
         if (lowerContent.contains("otp") ||
             lowerContent.contains("login") ||
@@ -99,12 +70,14 @@ public class PaymentNotificationListener extends NotificationListenerService {
             return;
         }
 
-        if (!isIncoming && !isOutflow) {
-            Log.d(TAG, "Ignoring non-payment notification: " + fullContent);
+        // 2. Identify Financial Transaction using Central Payment Engine
+        String txType = PaymentProcessor.detectTransactionType(fullContent);
+        if (txType == null) {
+            Log.d(TAG, "Ignoring non-financial notification: " + fullContent);
             return;
         }
 
-        // 4. Identify Channel (JazzCash, Easypaisa, or Pakistani Banking Apps)
+        // 3. Identify Channel Context (JazzCash, Easypaisa, or Pakistani Banking Apps)
         String senderContext;
         if (pkg.contains("mobilink") || pkg.contains("jazzcash") || title.toLowerCase().contains("jazzcash") || lowerContent.contains("jazzcash")) {
             senderContext = "8558";
@@ -134,7 +107,7 @@ public class PaymentNotificationListener extends NotificationListenerService {
             senderContext = "bank";
         }
 
-        Log.d(TAG, "Valid incoming payment notification: " + fullContent);
+        Log.d(TAG, "Valid financial (" + txType + ") notification: " + fullContent);
         PaymentProcessor.processIncomingText(this, senderContext, fullContent);
     }
 }
