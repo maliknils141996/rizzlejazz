@@ -267,20 +267,42 @@
                     android:layout_marginStart="4dp" />
             </LinearLayout>
 
-            <!-- SLEEK FROSTED SHARE BUTTON -->
-            <Button
-                android:id="@+id/btnShareSummary"
+            <!-- ACTION BUTTONS: SHARE REPORT & DOWNLOAD PDF -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="38dp"
-                android:text="💬 Share Summary Report"
-                android:textColor="#FFFFFF"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:textAllCaps="false"
-                android:backgroundTint="#30FFFFFF"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:layout_marginTop="14dp" />
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="14dp">
+
+                <Button
+                    android:id="@+id/btnShareSummary"
+                    android:layout_width="0dp"
+                    android:layout_height="38dp"
+                    android:layout_weight="1"
+                    android:text="💬 Share Report"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:backgroundTint="#30FFFFFF"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:layout_marginEnd="6dp" />
+
+                <Button
+                    android:id="@+id/btnDownloadPdfHero"
+                    android:layout_width="0dp"
+                    android:layout_height="38dp"
+                    android:layout_weight="1"
+                    android:text="📥 Download PDF"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:backgroundTint="#40FFFFFF"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp" />
+            </LinearLayout>
         </LinearLayout>
 
         <!-- SECTION: DUAL ACCOUNTS (JAZZCASH & EASYPAISA) -->
@@ -416,7 +438,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- LIVE TRANSACTIONS FEED HEADER -->
+        <!-- LIVE TRANSACTIONS FEED HEADER WITH PDF DOWNLOAD -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -424,22 +446,42 @@
             android:gravity="center_vertical"
             android:layout_marginTop="22dp">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Live Transactions Feed"
-                android:textColor="#0F172A"
-                android:textSize="15sp"
-                android:textStyle="bold" />
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tvDateRangeLabel"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Live Transactions Feed"
+                    android:textColor="#0F172A"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvDateRangeLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Today"
+                    android:textColor="#64748B"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnDownloadPdf"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Today"
-                android:textColor="#64748B"
-                android:textSize="11sp" />
+                android:layout_height="34dp"
+                android:text="📥 Download PDF"
+                android:textColor="#6D28D9"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:backgroundTint="#EDE9FE"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:paddingHorizontal="12dp" />
         </LinearLayout>
 
         <!-- BANK & WALLET FILTER DROPDOWN -->

@@ -7,12 +7,20 @@
     android:padding="16dp"
     android:layout_marginBottom="12dp">
 
-    <!-- Top Row: Channel Badge & Amount -->
+    <!-- Top Row: Bank Icon, Channel Badge & Amount -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/ivTxBankIcon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="6dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_bank_jazzcash" />
 
         <TextView
             android:id="@+id/tvTxChannel"

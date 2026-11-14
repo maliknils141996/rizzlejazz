@@ -55,17 +55,29 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v3.3.0-${{ github.run_number }}
-        name: PayVox v3.3.0 - Exactly-Once Announcement & All Banks & Wallets UI
+        tag_name: v3.4.0-${{ github.run_number }}
+        name: PayVox v3.4.0 - All Official Bank & Wallet Logos & PDF Transaction Statement Export
         body: |
-          ### 💜 PayVox v3.3.0 Production Release
+          ### 💜 PayVox v3.4.0 Production Release
 
           ✅ **Key Upgrades in this Release:**
-          - 🎯 **Exactly-Once Voice Announcement**: Suppressed the dual-trigger between Telephony SMS and Notification tray. Every payment (JazzCash send, Meezan receive) now announces strictly ONE time. No repetition!
-          - 📱 **Clean "All Banks & Wallets" UI**: Removed the cluttered "Account / Bank:" prefix label above the dropdown. Dropdown now cleanly reads "All Banks & Wallets".
-          - 🔄 **Smart Inter-Account Self-Transfer**: Seamlessly balances JazzCash Outflow (- Rs. 1) and Meezan Inflow (+ Rs. 1) with exact 1-time voice:
-            - *"JazzCash se 1 rupay send ho gaye hain"*
-            - *"Meezan Bank par 1 rupay receive ho gaye hain"*
+          - 🏦 **Authentic Official Bank & Wallet Logos**: Added high-definition branded logos for all 19 Pakistani banks and digital wallets:
+            - Faysal Bank (فیصل بینک)
+            - JS Bank (جے ایس بینک)
+            - Soneri Bank (سنہری بینک)
+            - SadaPay (سادہ پے)
+            - NayaPay (نیا پے)
+            - BankIslami (بینک اسلامی)
+            - Al Baraka Bank (البرکہ)
+            - Dubai Islamic Bank / DIB (دبئی اسلامی بینک)
+            - Standard Chartered (سٹینڈرڈ چارٹرڈ)
+            - Along with JazzCash, Easypaisa, Meezan, Alfalah, HBL, UBL, NBP, Allied, Bank AL Habib, MCB, BOP, and Askari.
+            - Brand logos also display directly inside each transaction feed card!
+          - 📄 **Native PDF Transaction Statement Export**:
+            - Added convenient `[ 📥 Download PDF ]` buttons in the Summary Hero Card and the Live Transactions Feed header.
+            - Generates an official, beautifully formatted A4 multi-page PDF transaction statement for any filtered period (Today, Yesterday, This Month, or Custom Date) and selected bank/wallet.
+            - Includes Executive Financial Summary (Total Received, Total Sent, Net Balance, and Counts) followed by detailed transaction ledger with TID, Date/Time, and Amount.
+            - Integrated with Android FileProvider for 1-tap open, view, print, or share via WhatsApp/Email.
           - 👑 **Universal Master Testing License**: `PV-MASTER-2026-VIP` (10-Year VIP Active)
 
           **Direct Download:** Click `PayVox.apk` below to download and install.

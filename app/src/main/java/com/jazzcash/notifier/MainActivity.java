@@ -33,6 +33,7 @@ import android.widget.Toast;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -73,6 +74,9 @@ public class MainActivity extends Activity {
     private Button btnFilterMonth;
     private Button btnFilterCalendar;
     private TextView tvDateRangeLabel;
+
+    private Button btnDownloadPdf;
+    private Button btnDownloadPdfHero;
 
     private LinearLayout llEmptyState;
     private LinearLayout llTransactionsList;
@@ -176,6 +180,8 @@ public class MainActivity extends Activity {
         tvTotalInflowSummary = findViewById(R.id.tvTotalInflowSummary);
         tvTotalOutflowSummary = findViewById(R.id.tvTotalOutflowSummary);
         btnShareSummary = findViewById(R.id.btnShareSummary);
+        btnDownloadPdfHero = findViewById(R.id.btnDownloadPdfHero);
+        btnDownloadPdf = findViewById(R.id.btnDownloadPdf);
 
         tvJazzNetBalance = findViewById(R.id.tvJazzNetBalance);
         tvJazzInflow = findViewById(R.id.tvJazzInflow);
@@ -239,15 +245,15 @@ public class MainActivity extends Activity {
         options.add(new BankOption("mcb", "MCB Bank", R.drawable.ic_bank_mcb));
         options.add(new BankOption("bop", "Bank of Punjab", R.drawable.ic_bank_bop));
         options.add(new BankOption("askari", "Askari Bank", R.drawable.ic_bank_askari));
-        options.add(new BankOption("faysal", "Faysal Bank", R.drawable.ic_bank_generic));
-        options.add(new BankOption("jsbank", "JS Bank", R.drawable.ic_bank_generic));
-        options.add(new BankOption("soneri", "Soneri Bank", R.drawable.ic_bank_generic));
-        options.add(new BankOption("sadapay", "SadaPay", R.drawable.ic_bank_generic));
-        options.add(new BankOption("nayapay", "NayaPay", R.drawable.ic_bank_generic));
-        options.add(new BankOption("bankislami", "BankIslami", R.drawable.ic_bank_generic));
-        options.add(new BankOption("albaraka", "Al Baraka Bank", R.drawable.ic_bank_generic));
-        options.add(new BankOption("dib", "Dubai Islamic Bank", R.drawable.ic_bank_generic));
-        options.add(new BankOption("scb", "Standard Chartered", R.drawable.ic_bank_generic));
+        options.add(new BankOption("faysal", "Faysal Bank", R.drawable.ic_bank_faysal));
+        options.add(new BankOption("jsbank", "JS Bank", R.drawable.ic_bank_jsbank));
+        options.add(new BankOption("soneri", "Soneri Bank", R.drawable.ic_bank_soneri));
+        options.add(new BankOption("sadapay", "SadaPay", R.drawable.ic_bank_sadapay));
+        options.add(new BankOption("nayapay", "NayaPay", R.drawable.ic_bank_nayapay));
+        options.add(new BankOption("bankislami", "BankIslami", R.drawable.ic_bank_bankislami));
+        options.add(new BankOption("albaraka", "Al Baraka Bank", R.drawable.ic_bank_albaraka));
+        options.add(new BankOption("dib", "Dubai Islamic Bank", R.drawable.ic_bank_dib));
+        options.add(new BankOption("scb", "Standard Chartered", R.drawable.ic_bank_scb));
 
         BankSpinnerAdapter adapter = new BankSpinnerAdapter(this, options);
         spinnerBankFilter.setAdapter(adapter);
@@ -304,6 +310,10 @@ public class MainActivity extends Activity {
         btnEnableNotif.setOnClickListener(v -> handleAllowAllPermissions());
 
         btnShareSummary.setOnClickListener(v -> shareReportViaWhatsApp());
+
+        View.OnClickListener pdfListener = v -> handleDownloadPdf();
+        if (btnDownloadPdf != null) btnDownloadPdf.setOnClickListener(pdfListener);
+        if (btnDownloadPdfHero != null) btnDownloadPdfHero.setOnClickListener(pdfListener);
     }
 
     private void setupFilterTabs() {
@@ -522,6 +532,33 @@ public class MainActivity extends Activity {
         return new ChannelMeta(rawChannel.toUpperCase(), "#334155");
     }
 
+    public static int getBankLogoRes(String rawChannel) {
+        if (rawChannel == null) return R.drawable.ic_bank_generic;
+        String ch = rawChannel.toLowerCase().trim();
+        if (ch.contains("jazzcash")) return R.drawable.ic_bank_jazzcash;
+        if (ch.contains("easypaisa")) return R.drawable.ic_bank_easypaisa;
+        if (ch.contains("meezan")) return R.drawable.ic_bank_meezan;
+        if (ch.contains("alfalah")) return R.drawable.ic_bank_alfalah;
+        if (ch.contains("hbl")) return R.drawable.ic_bank_hbl;
+        if (ch.contains("ubl")) return R.drawable.ic_bank_ubl;
+        if (ch.contains("nbp") || ch.contains("national bank")) return R.drawable.ic_bank_nbp;
+        if (ch.contains("alhabib") || ch.contains("bahl")) return R.drawable.ic_bank_alhabib;
+        if (ch.contains("mcb")) return R.drawable.ic_bank_mcb;
+        if (ch.contains("allied") || ch.contains("abl")) return R.drawable.ic_bank_allied;
+        if (ch.contains("bop") || ch.contains("punjab")) return R.drawable.ic_bank_bop;
+        if (ch.contains("askari")) return R.drawable.ic_bank_askari;
+        if (ch.contains("faysal")) return R.drawable.ic_bank_faysal;
+        if (ch.contains("jsbank") || ch.contains("js")) return R.drawable.ic_bank_jsbank;
+        if (ch.contains("soneri")) return R.drawable.ic_bank_soneri;
+        if (ch.contains("sadapay")) return R.drawable.ic_bank_sadapay;
+        if (ch.contains("nayapay")) return R.drawable.ic_bank_nayapay;
+        if (ch.contains("bankislami")) return R.drawable.ic_bank_bankislami;
+        if (ch.contains("albaraka")) return R.drawable.ic_bank_albaraka;
+        if (ch.contains("dib")) return R.drawable.ic_bank_dib;
+        if (ch.contains("scb") || ch.contains("standard chartered")) return R.drawable.ic_bank_scb;
+        return R.drawable.ic_bank_generic;
+    }
+
     private void loadKhataData() {
         String[] dateRange = computeDateRange(selectedFilterIndex);
         String startDate = dateRange[0];
@@ -605,6 +642,7 @@ public class MainActivity extends Activity {
             for (DatabaseHelper.TransactionItem tx : filtered) {
                 View itemView = inflater.inflate(R.layout.item_transaction, llTransactionsList, false);
 
+                ImageView ivTxBankIcon = itemView.findViewById(R.id.ivTxBankIcon);
                 TextView tvTxChannel = itemView.findViewById(R.id.tvTxChannel);
                 TextView tvTxAmount = itemView.findViewById(R.id.tvTxAmount);
                 TextView tvTxParty = itemView.findViewById(R.id.tvTxParty);
@@ -623,6 +661,9 @@ public class MainActivity extends Activity {
                 ChannelMeta meta = getChannelMeta(effectiveChannel);
                 tvTxChannel.setText(meta.displayName);
                 tvTxChannel.setBackgroundColor(meta.color);
+                if (ivTxBankIcon != null) {
+                    ivTxBankIcon.setImageResource(getBankLogoRes(effectiveChannel));
+                }
 
                 // Amount & Inflow/Outflow styling
                 boolean isInflow = "inflow".equalsIgnoreCase(tx.type);
@@ -739,6 +780,40 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             Intent chooser = Intent.createChooser(sendIntent, "Share Khata Report via");
             startActivity(chooser);
+        }
+    }
+
+    private void handleDownloadPdf() {
+        String[] dateRange = computeDateRange(selectedFilterIndex);
+        String startDate = dateRange[0];
+        String endDate = dateRange[1];
+        String label = dateRange[2];
+
+        String periodBadge = "TODAY";
+        if (selectedFilterIndex == 1) periodBadge = "YESTERDAY";
+        else if (selectedFilterIndex == 2) periodBadge = "THIS MONTH";
+        else if (selectedFilterIndex == 3) periodBadge = (customSelectedDate != null ? customSelectedDate : "CUSTOM DATE");
+
+        DatabaseHelper db = DatabaseHelper.getInstance(this);
+        DatabaseHelper.KhataStats stats = db.getStats(startDate, endDate, selectedBankFilter);
+        List<DatabaseHelper.TransactionItem> txList = db.getTransactions(startDate, endDate, selectedBankFilter);
+
+        if (txList.isEmpty()) {
+            Toast.makeText(this, "No transactions found to export for this period.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String bankName = "All Banks & Wallets";
+        if (!"all".equalsIgnoreCase(selectedBankFilter)) {
+            bankName = VoiceEngine.getChannelVoiceName(selectedBankFilter);
+        }
+
+        try {
+            File pdf = PdfStatementGenerator.generateStatement(this, periodBadge, label, bankName, stats, txList);
+            Toast.makeText(this, "PDF Statement generated!", Toast.LENGTH_SHORT).show();
+            PdfStatementGenerator.openPdf(this, pdf);
+        } catch (Exception e) {
+            Toast.makeText(this, "Failed to create PDF: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
