@@ -60,21 +60,22 @@ public class PaymentProcessor {
             return;
         }
 
-        // 5. Extract Trx ID
-        String trxId = extractTrxId(message);
+        // 5. Extract Trx ID or Create Deterministic Fingerprint
+        String trxId = extractTrxId(message, channel, amount);
+        boolean hasExplicitTid = (trxId != null && !trxId.isEmpty() && !trxId.startsWith("TX-"));
 
-        // 6. DEDUPLICATION CHECK
+        // Deduplication fingerprint
+        String normMessage = message.replaceAll("\\s+", " ").trim().toLowerCase();
+        String contentHash = Integer.toHexString(normMessage.hashCode());
         long now = System.currentTimeMillis();
-        // If a real TID exists, deduplicate against double alerts for that exact same channel, type & TID
-        if (trxId != null && !trxId.isEmpty() && !trxId.startsWith("TX-GEN-")) {
-            String dedupKey = channel + "_" + type + "_" + trxId;
-            Long lastSeen = processedAlertsCache.get(dedupKey);
-            if (lastSeen != null && (now - lastSeen) < DEDUP_WINDOW_MS) {
-                Log.d(TAG, "Duplicate alert detected for same TID (" + dedupKey + "). Skipping.");
-                return;
-            }
-            processedAlertsCache.put(dedupKey, now);
+
+        String dedupKey = channel + "_" + type + "_" + (long)amount + "_" + (hasExplicitTid ? trxId : contentHash);
+        Long lastSeen = processedAlertsCache.get(dedupKey);
+        if (lastSeen != null && (now - lastSeen) < DEDUP_WINDOW_MS) {
+            Log.d(TAG, "Duplicate alert detected (" + dedupKey + "). Skipping duplicate processing.");
+            return;
         }
+        processedAlertsCache.put(dedupKey, now);
 
         // 7. Extract Counterparty and Mentioned Destination Bank
         String counterparty = extractCounterparty(message, isOutflow);
@@ -107,20 +108,53 @@ public class PaymentProcessor {
             purpose = channelVoice + " Payment Received";
         }
 
-        // 8. CRITICAL: Voice Announcement MUST ALWAYS fire for soundbox alerts!
-        if ("inflow".equalsIgnoreCase(type)) {
-            VoiceEngine.getInstance(context).speakPayment(channel, amount);
-        } else if ("outflow".equalsIgnoreCase(type)) {
-            VoiceEngine.getInstance(context).speakOutflow(channel, amount);
+        // 8. CRITICAL: Voice Announcement & Self-Transfer Handling
+        // CHECK FOR SELF-TRANSFER (e.g. "received from NAVEED IQBAL JAZZCASH-xxx to A/C xxx8514")
+        boolean isOwnerSender = isOwnerTransfer(counterparty);
+        String sourceWallet = null;
+        if (!isOutflow && isOwnerSender) {
+            String cpLower = counterparty.toLowerCase();
+            if (cpLower.contains("jazzcash") || cpLower.contains("jazz")) {
+                sourceWallet = "jazzcash";
+            } else if (cpLower.contains("easypaisa") || cpLower.contains("easy")) {
+                sourceWallet = "easypaisa";
+            }
         }
 
-        // 9. Save to Local SQLite Database
-        DatabaseHelper db = DatabaseHelper.getInstance(context);
-        boolean inserted = db.insertTransaction(trxId, amount, type, channel, whoSent, whoReceived, purpose);
-        if (inserted) {
-            Log.d(TAG, "Recorded " + type + " of Rs. " + amount + " on " + channel + " (TID: " + trxId + ")");
+        if (sourceWallet != null) {
+            // Self-transfer: Owner moved money from their JazzCash/Easypaisa to their Meezan/Bank account!
+            String sourceName = VoiceEngine.getChannelVoiceName(sourceWallet);
+            String destName = VoiceEngine.getChannelVoiceName(channel);
+
+            // Speak both clearly:
+            // "JazzCash se 1 rupay send ho gaye hain"
+            // "Meezan Bank par 1 rupay receive ho gaye hain"
+            VoiceEngine.getInstance(context).speakOutflow(sourceWallet, amount);
+            VoiceEngine.getInstance(context).speakPayment(channel, amount);
+
+            DatabaseHelper db = DatabaseHelper.getInstance(context);
+
+            // Record Outflow on Source Wallet
+            String sourceTrxId = "TX-" + sourceWallet.toUpperCase() + "-" + (long)amount + "-" + contentHash;
+            db.insertTransaction(sourceTrxId, amount, "outflow", sourceWallet, "Shop (" + sourceName + ")", destName, "Transferred to " + destName);
+            processedAlertsCache.put(sourceWallet + "_outflow_" + (long)amount + "_" + contentHash, now);
+
+            // Record Inflow on Destination Bank
+            db.insertTransaction(trxId, amount, "inflow", channel, counterparty, "Shop (" + destName + ")", purpose);
+            Log.d(TAG, "Recorded self-transfer: Outflow from " + sourceWallet + " (-" + amount + ") and Inflow to " + channel + " (+" + amount + ")");
         } else {
-            Log.w(TAG, "Transaction already in ledger or updated: " + trxId);
+            // Normal Inflow / Outflow
+            if ("inflow".equalsIgnoreCase(type)) {
+                VoiceEngine.getInstance(context).speakPayment(channel, amount);
+            } else if ("outflow".equalsIgnoreCase(type)) {
+                VoiceEngine.getInstance(context).speakOutflow(channel, amount);
+            }
+
+            DatabaseHelper db = DatabaseHelper.getInstance(context);
+            boolean inserted = db.insertTransaction(trxId, amount, type, channel, whoSent, whoReceived, purpose);
+            if (inserted) {
+                Log.d(TAG, "Recorded " + type + " of Rs. " + amount + " on " + channel + " (TID: " + trxId + ")");
+            }
         }
 
         // 10. Live refresh MainActivity UI
@@ -414,7 +448,13 @@ public class PaymentProcessor {
         return Double.parseDouble(val.replace(",", "").trim());
     }
 
-    private static String extractTrxId(String msg) {
+    public static boolean isOwnerTransfer(String counterparty) {
+        if (counterparty == null) return false;
+        String cp = counterparty.toLowerCase();
+        return cp.contains("naveed") || cp.contains("malik") || cp.contains("iqbal") || cp.contains("self");
+    }
+
+    private static String extractTrxId(String msg, String channel, double amount) {
         try {
             Pattern p = Pattern.compile("(?:Trx\\s*ID|TID|TxID|Txn\\s*ID|Transaction\\s*ID|TXN|Trans\\s*ID|Ref(?:erence)?\\s*(?:No|ID|#)?|STAN)[:\\s]*([A-Za-z0-9]+)", Pattern.CASE_INSENSITIVE);
             Matcher m = p.matcher(msg);
@@ -424,7 +464,10 @@ public class PaymentProcessor {
         } catch (Exception e) {
             Log.e(TAG, "Error parsing TID: " + e.getMessage());
         }
-        return "TX-GEN-" + System.currentTimeMillis() + "-" + (int)(Math.random() * 9000 + 1000);
+        // Deterministic fingerprint hash
+        String norm = msg.replaceAll("\\s+", " ").trim().toLowerCase();
+        String hash = Integer.toHexString(norm.hashCode());
+        return "TX-" + (channel != null ? channel.toUpperCase() : "GEN") + "-" + (long)amount + "-" + hash;
     }
 
     private static String extractCounterparty(String msg, boolean isOutflow) {
@@ -436,8 +479,8 @@ public class PaymentProcessor {
                 return mPhone.group(1).trim();
             }
 
-            // Check for Raast format: "received from MALIK NAVEED IQBAL AC ..." or "received from ALI KHAN in your"
-            Pattern pRaast = Pattern.compile("(?:received|recieved|credited)\\s+(?:from|via Raast from)\\s+([A-Za-z0-9\\s]{2,35}?)(?:\\s+AC|\\s+A/C|\\s+via|\\(|\\.|in your|TID|,|$)", Pattern.CASE_INSENSITIVE);
+            // Check for Raast / Bank format: "received from NAVEED IQBAL JAZZCASH-xxx1206 to A/C xxx8514 ..."
+            Pattern pRaast = Pattern.compile("(?:received|recieved|credited)\\s+(?:from|via Raast from)\\s+([A-Za-z0-9\\-\\s]{2,40}?)(?:\\s+to\\s+A/C|\\s+to\\s+account|\\s+AC|\\s+A/C|\\s+via|\\(|\\.|in your|TID|,|$)", Pattern.CASE_INSENSITIVE);
             Matcher mRaast = pRaast.matcher(msg);
             if (mRaast.find()) {
                 String name = mRaast.group(1).trim();
@@ -447,7 +490,7 @@ public class PaymentProcessor {
             }
 
             // Check for standard names like "sent to RIZZLE PHARMACY," or "to Ali Khan"
-            Pattern pName = Pattern.compile("(?:from|to)\\s+([A-Za-z0-9\\s]{2,30}?)(?:\\s+AC|\\s+A/C|,|\\(|\\.|TID|Balance|$)", Pattern.CASE_INSENSITIVE);
+            Pattern pName = Pattern.compile("(?:from|to)\\s+([A-Za-z0-9\\-\\s]{2,35}?)(?:\\s+AC|\\s+A/C|,|\\(|\\.|TID|Balance|$)", Pattern.CASE_INSENSITIVE);
             Matcher mName = pName.matcher(msg);
             if (mName.find()) {
                 String name = mName.group(1).trim();

@@ -55,16 +55,16 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v3.1.0-${{ github.run_number }}
-        name: PayVox v3.1.0 - Total Channel Isolation & Raast Inter-Bank Routing Fix
+        tag_name: v3.2.0-${{ github.run_number }}
+        name: PayVox v3.2.0 - Zero-Duplicate Fingerprint Dedup & Smart Self-Transfer Balancing
         body: |
-          ### 💜 PayVox v3.1.0 Production Release
+          ### 💜 PayVox v3.2.0 Production Release
 
           ✅ **Key Upgrades in this Release:**
-          - 🎯 **Fixed Inter-Bank Raast Attribution Bug**: Prevented bank received SMS (e.g. from Meezan 8079) mentioning "via Raast from JAZZCASH" from falsely overriding the channel to JazzCash. Meezan alerts will ALWAYS announce as Meezan Bank.
-          - 📤 **Clean Outflow Separation**: Outgoing payments from JazzCash to Meezan Bank now explicitly state *"JazzCash se [amount] rupay send ho gaye hain"*, and incoming credits state *"Meezan Bank par [amount] rupay receive ho gaye hain"*.
-          - 📢 **Non-Conflicting Audio Queue**: Replaced TTS QUEUE_FLUSH with QUEUE_ADD so sequential dual-alerts (Debit + Credit) speak completely without cancelling each other.
-          - 🏦 **Authentic Bank Logos**: 10 official Pakistani bank icons cropped from specification sheet.
+          - 🚫 **100% Zero-Duplicate Fingerprint Deduplication**: Fixed the bug where messages without a TID (like Meezan 1 PKR alert) bypassed deduplication and announced/inserted twice. Every message is now fingerprint-deduplicated across SMS and Notification tray. Zero double entries!
+          - 🔄 **Smart Inter-Account Self-Transfer Balancing**: When money is moved from your own JazzCash to your Meezan Bank and JazzCash does not send an SMS, PayVox detects the transfer from the Meezan alert (`from NAVEED IQBAL JAZZCASH`), automatically records the JazzCash Outflow (- Rs. 1) and Meezan Inflow (+ Rs. 1), and announces both:
+            - *"JazzCash se 1 rupay send ho gaye hain"*
+            - *"Meezan Bank par 1 rupay receive ho gaye hain"*
           - 👑 **Universal Master Testing License**: `PV-MASTER-2026-VIP` (10-Year VIP Active)
 
           **Direct Download:** Click `PayVox.apk` below to download and install.

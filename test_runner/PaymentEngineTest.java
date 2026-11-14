@@ -453,6 +453,12 @@ public class PaymentEngineTest {
                 "Dear Customer, A/C *12057 credited with PKR 9,177.00 via Raast from 03001234567 JAZZCASH Ref 730069976433",
                 "bank", "inflow", 9177.0, "Bank par 9177 rupay receive ho gaye hain"));
 
+        // 20. Exact User Message: 1 PKR Meezan SMS from NAVEED IQBAL JAZZCASH
+        tests.add(new TestCase("20. User Live Test: 1 PKR Meezan SMS",
+                "8079",
+                "PKR 1.00 received from NAVEED IQBAL JAZZCASH-xxx1206 to A/C xxx8514 of SATELLITE TWN BWP on 14-Nov-2026 at 14:1",
+                "meezan", "inflow", 1.0, "Meezan Bank par 1 rupay receive ho gaye hain"));
+
         int passed = 0;
         int failed = 0;
 
