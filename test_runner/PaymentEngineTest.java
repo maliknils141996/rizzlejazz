@@ -44,6 +44,14 @@ public class PaymentEngineTest {
         if (s.contains("4722") || s.contains("mcb")) {
             return "mcb";
         }
+        // National Bank of Pakistan (NBP)
+        if (s.contains("nbp") || s.contains("national bank")) {
+            return "nbp";
+        }
+        // Bank AL Habib (BAHL)
+        if (s.contains("bahl") || s.contains("alhabib") || s.contains("al habib")) {
+            return "alhabib";
+        }
         // Allied Bank ABL (2252, Allied, ABL)
         if (s.contains("allied") || s.contains("abl")) {
             return "allied";
@@ -255,6 +263,9 @@ public class PaymentEngineTest {
             case "hbl": return "HBL";
             case "ubl": return "UBL";
             case "mcb": return "MCB Bank";
+            case "nbp": return "National Bank";
+            case "alhabib":
+            case "bahl": return "Bank AL Habib";
             case "allied": return "Allied Bank";
             case "faysal": return "Faysal Bank";
             case "askari": return "Askari Bank";
@@ -392,6 +403,18 @@ public class PaymentEngineTest {
                 "Alerts",
                 "Dear Customer, A/C *9988 credited with PKR 2,000.00 via Raast from 03001234567 Ref 556677",
                 "bank", "inflow", 2000.0, "Bank par 2000 rupay receive ho gaye hain"));
+
+        // 16. National Bank of Pakistan (NBP) (Inflow)
+        tests.add(new TestCase("16. National Bank of Pakistan (NBP) Inflow",
+                "NBP",
+                "Dear Customer, your NBP Account 0123... has been credited with PKR 4,500.00 on 14-Nov-2026. Available balance: PKR 18,000.00",
+                "nbp", "inflow", 4500.0, "National Bank par 4500 rupay receive ho gaye hain"));
+
+        // 17. Bank AL Habib (BAHL) (Inflow)
+        tests.add(new TestCase("17. Bank AL Habib (BAHL) Inflow",
+                "BAHL",
+                "Dear Customer, your Bank AL Habib Account 1010... has been credited with PKR 6,200.00 via Raast. Available balance: PKR 22,000.00",
+                "alhabib", "inflow", 6200.0, "Bank AL Habib par 6200 rupay receive ho gaye hain"));
 
         int passed = 0;
         int failed = 0;

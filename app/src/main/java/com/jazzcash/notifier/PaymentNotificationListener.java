@@ -38,11 +38,6 @@ public class PaymentNotificationListener extends NotificationListenerService {
 
         String pkg = sbn.getPackageName() != null ? sbn.getPackageName().toLowerCase() : "";
 
-        // 1. Skip all SMS apps because SmsReceiver handles real SMS directly from telephony provider
-        if (pkg.contains("messaging") || pkg.contains("mms") || pkg.contains("telephony")) {
-            return;
-        }
-
         Notification notification = sbn.getNotification();
         Bundle extras = notification.extras;
         if (extras == null) return;
@@ -66,7 +61,8 @@ public class PaymentNotificationListener extends NotificationListenerService {
             lowerContent.contains("login") ||
             lowerContent.contains("verification code") ||
             lowerContent.contains("balance inquiry") ||
-            lowerContent.contains("password")) {
+            lowerContent.contains("password") ||
+            lowerContent.contains("downloading")) {
             return;
         }
 
@@ -79,35 +75,44 @@ public class PaymentNotificationListener extends NotificationListenerService {
 
         // 3. Identify Channel Context (JazzCash, Easypaisa, or Pakistani Banking Apps)
         String senderContext;
-        if (pkg.contains("mobilink") || pkg.contains("jazzcash") || title.toLowerCase().contains("jazzcash") || lowerContent.contains("jazzcash")) {
+        String lowerTitle = title != null ? title.toLowerCase() : "";
+
+        if (lowerTitle.contains("8558") || lowerTitle.contains("jazzcash") || pkg.contains("mobilink") || pkg.contains("jazzcash") || lowerContent.contains("jazzcash")) {
             senderContext = "8558";
-        } else if (pkg.contains("telenor") || pkg.contains("easypaisa") || title.toLowerCase().contains("easypaisa") || lowerContent.contains("easypaisa")) {
+        } else if (lowerTitle.contains("3737") || lowerTitle.contains("easypaisa") || pkg.contains("telenor") || pkg.contains("easypaisa") || lowerContent.contains("easypaisa")) {
             senderContext = "3737";
-        } else if (pkg.contains("meezan") || lowerContent.contains("meezan")) {
-            senderContext = "meezan";
-        } else if (pkg.contains("alfalah") || lowerContent.contains("alfalah")) {
-            senderContext = "alfalah";
-        } else if (pkg.contains("hbl") || lowerContent.contains("hbl")) {
-            senderContext = "hbl";
-        } else if (pkg.contains("ubl") || lowerContent.contains("ubl")) {
-            senderContext = "ubl";
-        } else if (pkg.contains("mcb") || lowerContent.contains("mcb")) {
-            senderContext = "mcb";
-        } else if (pkg.contains("allied") || pkg.contains("abl") || lowerContent.contains("allied bank")) {
+        } else if (lowerTitle.contains("8079") || lowerTitle.contains("8078") || lowerTitle.contains("9060") || lowerTitle.contains("8222") || lowerTitle.contains("meezan") || pkg.contains("meezan") || lowerContent.contains("meezan")) {
+            senderContext = "8079";
+        } else if (lowerTitle.contains("2252") || lowerTitle.contains("alfalah") || pkg.contains("alfalah") || lowerContent.contains("alfalah")) {
+            senderContext = "2252";
+        } else if (lowerTitle.contains("4250") || lowerTitle.contains("hbl") || pkg.contains("hbl") || lowerContent.contains("hbl")) {
+            senderContext = "4250";
+        } else if (lowerTitle.contains("8257") || lowerTitle.contains("ubl") || pkg.contains("ubl") || lowerContent.contains("ubl")) {
+            senderContext = "8257";
+        } else if (lowerTitle.contains("4722") || lowerTitle.contains("mcb") || pkg.contains("mcb") || lowerContent.contains("mcb")) {
+            senderContext = "4722";
+        } else if (lowerTitle.contains("nbp") || pkg.contains("nbp") || lowerContent.contains("national bank") || lowerContent.contains("nbp")) {
+            senderContext = "nbp";
+        } else if (lowerTitle.contains("alhabib") || lowerTitle.contains("bahl") || lowerContent.contains("bank al habib") || lowerContent.contains("alhabib")) {
+            senderContext = "alhabib";
+        } else if (lowerTitle.contains("allied") || lowerTitle.contains("abl") || pkg.contains("allied") || pkg.contains("abl") || lowerContent.contains("allied bank")) {
             senderContext = "allied";
-        } else if (pkg.contains("faysal") || lowerContent.contains("faysal")) {
+        } else if (lowerTitle.contains("faysal") || lowerTitle.contains("fbl") || pkg.contains("faysal") || lowerContent.contains("faysal")) {
             senderContext = "faysal";
-        } else if (pkg.contains("askari") || lowerContent.contains("askari")) {
+        } else if (lowerTitle.contains("askari") || lowerTitle.contains("akbl") || pkg.contains("askari") || lowerContent.contains("askari")) {
             senderContext = "askari";
-        } else if (pkg.contains("sadapay") || lowerContent.contains("sadapay")) {
+        } else if (lowerTitle.contains("bop") || lowerTitle.contains("punjab") || pkg.contains("bop") || lowerContent.contains("bank of punjab")) {
+            senderContext = "bop";
+        } else if (lowerTitle.contains("sadapay") || pkg.contains("sadapay") || lowerContent.contains("sadapay")) {
             senderContext = "sadapay";
-        } else if (pkg.contains("nayapay") || lowerContent.contains("nayapay")) {
+        } else if (lowerTitle.contains("nayapay") || pkg.contains("nayapay") || lowerContent.contains("nayapay")) {
             senderContext = "nayapay";
         } else {
-            senderContext = "bank";
+            // Use title as sender (often holds the shortcode like 8558, 8079, etc. from SMS apps)
+            senderContext = (title != null && !title.trim().isEmpty()) ? title.trim() : "bank";
         }
 
-        Log.d(TAG, "Valid financial (" + txType + ") notification: " + fullContent);
+        Log.d(TAG, "Valid financial (" + txType + ") notification from " + senderContext + ": " + fullContent);
         PaymentProcessor.processIncomingText(this, senderContext, fullContent);
     }
 }

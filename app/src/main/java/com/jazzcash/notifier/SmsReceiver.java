@@ -62,6 +62,7 @@ public class SmsReceiver extends BroadcastReceiver {
                 s.contains("mcb") || s.contains("allied") || s.contains("abl") || s.contains("faysal") ||
                 s.contains("fbl") || s.contains("askari") || s.contains("bop") || s.contains("js") ||
                 s.contains("soneri") || s.contains("sada") || s.contains("naya") || s.contains("bank") ||
+                s.contains("nbp") || s.contains("alhabib") || s.contains("bahl") ||
                 s.contains("raast");
 
         boolean hasFinancialContent = (m.contains("rs") || m.contains("pkr")) &&

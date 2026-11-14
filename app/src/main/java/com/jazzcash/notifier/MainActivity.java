@@ -229,15 +229,17 @@ public class MainActivity extends Activity {
         options.add(new BankOption("all", "All Accounts & Banks", R.drawable.ic_bank_all));
         options.add(new BankOption("jazzcash", "JazzCash", R.drawable.ic_bank_jazzcash));
         options.add(new BankOption("easypaisa", "Easypaisa", R.drawable.ic_bank_easypaisa));
+        options.add(new BankOption("ubl", "UBL", R.drawable.ic_bank_ubl));
+        options.add(new BankOption("hbl", "HBL Bank", R.drawable.ic_bank_hbl));
+        options.add(new BankOption("nbp", "National Bank (NBP)", R.drawable.ic_bank_nbp));
         options.add(new BankOption("meezan", "Meezan Bank", R.drawable.ic_bank_meezan));
         options.add(new BankOption("alfalah", "Bank Alfalah", R.drawable.ic_bank_alfalah));
-        options.add(new BankOption("hbl", "HBL", R.drawable.ic_bank_hbl));
-        options.add(new BankOption("ubl", "UBL", R.drawable.ic_bank_ubl));
+        options.add(new BankOption("allied", "Allied Bank", R.drawable.ic_bank_allied));
+        options.add(new BankOption("alhabib", "Bank AL Habib", R.drawable.ic_bank_alhabib));
         options.add(new BankOption("mcb", "MCB Bank", R.drawable.ic_bank_mcb));
-        options.add(new BankOption("allied", "Allied Bank", R.drawable.ic_bank_generic));
+        options.add(new BankOption("bop", "Bank of Punjab", R.drawable.ic_bank_bop));
+        options.add(new BankOption("askari", "Askari Bank", R.drawable.ic_bank_askari));
         options.add(new BankOption("faysal", "Faysal Bank", R.drawable.ic_bank_generic));
-        options.add(new BankOption("askari", "Askari Bank", R.drawable.ic_bank_generic));
-        options.add(new BankOption("bop", "Bank of Punjab", R.drawable.ic_bank_generic));
         options.add(new BankOption("jsbank", "JS Bank", R.drawable.ic_bank_generic));
         options.add(new BankOption("soneri", "Soneri Bank", R.drawable.ic_bank_generic));
         options.add(new BankOption("sadapay", "SadaPay", R.drawable.ic_bank_generic));
@@ -500,13 +502,15 @@ public class MainActivity extends Activity {
         if (ch.contains("easypaisa")) return new ChannelMeta("EASYPAISA", "#00A651");
         if (ch.contains("meezan")) return new ChannelMeta("MEEZAN BANK", "#1A365D");
         if (ch.contains("alfalah")) return new ChannelMeta("BANK ALFALAH", "#002D62");
-        if (ch.contains("hbl")) return new ChannelMeta("HBL", "#00593B");
+        if (ch.contains("hbl")) return new ChannelMeta("HBL BANK", "#00593B");
         if (ch.contains("ubl")) return new ChannelMeta("UBL", "#0072CE");
+        if (ch.contains("nbp") || ch.contains("national bank")) return new ChannelMeta("NATIONAL BANK NBP", "#005A36");
+        if (ch.contains("alhabib") || ch.contains("bahl")) return new ChannelMeta("BANK AL HABIB", "#004B23");
         if (ch.contains("mcb")) return new ChannelMeta("MCB BANK", "#EA580C");
         if (ch.contains("allied") || ch.contains("abl")) return new ChannelMeta("ALLIED BANK", "#0284C7");
-        if (ch.contains("faysal")) return new ChannelMeta("FAYSAL BANK", "#7E22CE");
+        if (ch.contains("bop") || ch.contains("punjab")) return new ChannelMeta("BANK OF PUNJAB", "#EA580C");
         if (ch.contains("askari")) return new ChannelMeta("ASKARI BANK", "#15803D");
-        if (ch.contains("bop") || ch.contains("punjab")) return new ChannelMeta("BANK OF PUNJAB", "#0369A1");
+        if (ch.contains("faysal")) return new ChannelMeta("FAYSAL BANK", "#7E22CE");
         if (ch.contains("jsbank") || ch.contains("js")) return new ChannelMeta("JS BANK", "#2563EB");
         if (ch.contains("soneri")) return new ChannelMeta("SONERI BANK", "#0284C7");
         if (ch.contains("sadapay")) return new ChannelMeta("SADAPAY", "#0D9488");
@@ -609,7 +613,14 @@ public class MainActivity extends Activity {
                 TextView tvTxTime = itemView.findViewById(R.id.tvTxTime);
 
                 // Channel Badge Styling
-                ChannelMeta meta = getChannelMeta(tx.channel);
+                String effectiveChannel = tx.channel;
+                if (effectiveChannel == null || "bank".equalsIgnoreCase(effectiveChannel) || "outflow".equalsIgnoreCase(tx.type)) {
+                    String found = PaymentProcessor.detectMentionedBank(tx.purpose + " " + tx.recipient + " " + tx.sender);
+                    if (found != null) {
+                        effectiveChannel = found;
+                    }
+                }
+                ChannelMeta meta = getChannelMeta(effectiveChannel);
                 tvTxChannel.setText(meta.displayName);
                 tvTxChannel.setBackgroundColor(meta.color);
 

@@ -103,6 +103,9 @@ public class VoiceEngine {
             case "hbl": return "HBL";
             case "ubl": return "UBL";
             case "mcb": return "MCB Bank";
+            case "nbp": return "National Bank";
+            case "alhabib":
+            case "bahl": return "Bank AL Habib";
             case "allied":
             case "abl": return "Allied Bank";
             case "faysal": return "Faysal Bank";

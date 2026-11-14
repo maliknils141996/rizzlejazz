@@ -76,16 +76,36 @@ public class PaymentProcessor {
             processedAlertsCache.put(dedupKey, now);
         }
 
-        // 7. Extract Counterparty
+        // 7. Extract Counterparty and Mentioned Destination Bank
         String counterparty = extractCounterparty(message, isOutflow);
         if (counterparty.isEmpty()) {
-            counterparty = isOutflow ? "Vendor / Recipient" : (VoiceEngine.getChannelVoiceName(channel) + " Customer");
+            counterparty = isOutflow ? "Recipient" : (VoiceEngine.getChannelVoiceName(channel) + " Customer");
+        }
+
+        String targetBank = detectMentionedBank(message);
+        String channelVoice = VoiceEngine.getChannelVoiceName(channel);
+
+        // If generic bank, upgrade to specific mentioned bank
+        if ("bank".equalsIgnoreCase(channel) && targetBank != null) {
+            channel = targetBank;
+            channelVoice = VoiceEngine.getChannelVoiceName(channel);
         }
 
         String whoSent = isOutflow ? "Shop" : counterparty;
         String whoReceived = isOutflow ? counterparty : "Shop";
-        String channelVoice = VoiceEngine.getChannelVoiceName(channel);
-        String purpose = isOutflow ? (channelVoice + " Outflow / Sent") : (channelVoice + " Payment Received");
+        String purpose;
+
+        if (isOutflow) {
+            if (targetBank != null && !"bank".equalsIgnoreCase(targetBank)) {
+                String targetBankName = VoiceEngine.getChannelVoiceName(targetBank);
+                whoReceived = targetBankName + (!counterparty.equalsIgnoreCase("Recipient") ? " - " + counterparty : "");
+                purpose = "Sent to " + targetBankName;
+            } else {
+                purpose = channelVoice + " Outflow / Sent";
+            }
+        } else {
+            purpose = channelVoice + " Payment Received";
+        }
 
         // 8. CRITICAL: Voice Announcement MUST ALWAYS fire for soundbox alerts!
         if ("inflow".equalsIgnoreCase(type)) {
@@ -206,6 +226,14 @@ public class PaymentProcessor {
         if (s.contains("4722") || s.contains("mcb")) {
             return "mcb";
         }
+        // National Bank of Pakistan (NBP)
+        if (s.contains("nbp") || s.contains("national bank")) {
+            return "nbp";
+        }
+        // Bank AL Habib (BAHL)
+        if (s.contains("bahl") || s.contains("alhabib") || s.contains("al habib")) {
+            return "alhabib";
+        }
         // Allied Bank ABL (2252, Allied, ABL)
         if (s.contains("allied") || Pattern.compile("\\babl\\b", Pattern.CASE_INSENSITIVE).matcher(s).find()) {
             return "allied";
@@ -263,6 +291,8 @@ public class PaymentProcessor {
         if (m.contains("habib bank") || m.contains("hbl alert") || m.contains("hbl a/c") || m.contains("hbl")) return "hbl";
         if (m.contains("ubl digital") || m.contains("ubl alert") || m.contains("ubl a/c") || m.contains("ubl")) return "ubl";
         if (m.contains("mcb bank") || m.contains("mcb alert") || m.contains("mcb")) return "mcb";
+        if (m.contains("national bank") || Pattern.compile("\\bnbp\\b", Pattern.CASE_INSENSITIVE).matcher(m).find()) return "nbp";
+        if (m.contains("bank al habib") || m.contains("al habib") || Pattern.compile("\\bbahl\\b", Pattern.CASE_INSENSITIVE).matcher(m).find()) return "alhabib";
         if (m.contains("allied bank") || Pattern.compile("\\babl\\b", Pattern.CASE_INSENSITIVE).matcher(m).find() || m.contains("allied")) return "allied";
         if (m.contains("faysal bank") || m.contains("faysal")) return "faysal";
         if (m.contains("askari bank") || m.contains("askari")) return "askari";
@@ -279,6 +309,31 @@ public class PaymentProcessor {
         if (m.contains("raast") || m.contains("a/c") || m.contains("account")) return "bank";
 
         return "bank"; // SAFE DEFAULT: Never misattribute mystery SMS to JazzCash!
+    }
+
+    public static String detectMentionedBank(String text) {
+        if (text == null) return null;
+        String t = text.toLowerCase();
+        if (t.contains("meezan")) return "meezan";
+        if (t.contains("ubl")) return "ubl";
+        if (t.contains("hbl") || t.contains("habib bank limited")) return "hbl";
+        if (t.contains("alfalah") || t.contains("bafl")) return "alfalah";
+        if (t.contains("national bank") || Pattern.compile("\\bnbp\\b", Pattern.CASE_INSENSITIVE).matcher(t).find()) return "nbp";
+        if (t.contains("bank al habib") || t.contains("al habib") || Pattern.compile("\\bbahl\\b", Pattern.CASE_INSENSITIVE).matcher(t).find()) return "alhabib";
+        if (t.contains("mcb")) return "mcb";
+        if (t.contains("allied") || Pattern.compile("\\babl\\b", Pattern.CASE_INSENSITIVE).matcher(t).find()) return "allied";
+        if (t.contains("askari") || t.contains("akbl")) return "askari";
+        if (t.contains("bop") || t.contains("punjab")) return "bop";
+        if (t.contains("faysal") || t.contains("fbl")) return "faysal";
+        if (t.contains("jsbank") || t.contains("js bank")) return "jsbank";
+        if (t.contains("soneri")) return "soneri";
+        if (t.contains("sadapay")) return "sadapay";
+        if (t.contains("nayapay")) return "nayapay";
+        if (t.contains("bankislami")) return "bankislami";
+        if (t.contains("albaraka")) return "albaraka";
+        if (t.contains("dib") || t.contains("dubai islamic")) return "dib";
+        if (t.contains("standard chartered") || t.contains("scb")) return "scb";
+        return null;
     }
 
     public static double extractAmount(String msg) {
