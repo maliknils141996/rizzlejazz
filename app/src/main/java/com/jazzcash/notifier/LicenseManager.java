@@ -74,14 +74,17 @@ public class LicenseManager {
 
     public static ValidationResult activateLicense(Context context, String inputKey) {
         if (inputKey == null) return new ValidationResult(false, "License key cannot be empty.");
-        String key = inputKey.trim().toUpperCase(Locale.ROOT);
+        String rawKey = inputKey.trim();
+        String upperKey = rawKey.toUpperCase(Locale.ROOT);
 
         // MASTER DEVELOPER / VIP TESTING KEYS (Works on ANY device for 10 years)
-        if ("PV-MASTER-2026-VIP".equals(key) || "PV-MASTER-TEST-786".equals(key) || "PV-TEST-MASTER".equals(key)) {
+        if ("PV-MASTER-2026-VIP".equalsIgnoreCase(upperKey) || 
+            "PV-MASTER-TEST-786".equalsIgnoreCase(upperKey) || 
+            "PV-TEST-MASTER".equalsIgnoreCase(upperKey)) {
             long lifetimeExpiry = System.currentTimeMillis() + (3650L * 24 * 60 * 60 * 1000); // 10 years (3,650 days)
             SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
             prefs.edit()
-                    .putString(KEY_LICENSE, key)
+                    .putString(KEY_LICENSE, upperKey)
                     .putLong(KEY_EXPIRY, lifetimeExpiry)
                     .putLong(KEY_LAST_SEEN, System.currentTimeMillis())
                     .putBoolean(KEY_BLACKLISTED, false)
@@ -90,25 +93,47 @@ public class LicenseManager {
             return new ValidationResult(true, "👑 Master License Activated! (10 Years VIP Access)");
         }
 
-        if (!key.startsWith("PV-") && !key.startsWith("RJ-")) {
+        if (!upperKey.startsWith("PV-") && !upperKey.startsWith("RJ-")) {
             return new ValidationResult(false, "Invalid format. Key must start with PV-");
         }
 
-        String[] parts = key.split("-");
-        if (parts.length != 3) {
+        int firstDash = rawKey.indexOf('-');
+        int lastDash = rawKey.lastIndexOf('-');
+        if (firstDash == -1 || lastDash == -1 || firstDash == lastDash) {
             return new ValidationResult(false, "Invalid key structure.");
         }
 
-        String b64Payload = parts[1];
-        String providedSig = parts[2].toUpperCase(Locale.ROOT);
+        String payloadStr = rawKey.substring(firstDash + 1, lastDash).trim();
+        String providedSig = rawKey.substring(lastDash + 1).trim().toUpperCase(Locale.ROOT);
 
         try {
-            // Restore Base64 padding
-            int mod = b64Payload.length() % 4;
-            if (mod == 2) b64Payload += "==";
-            else if (mod == 3) b64Payload += "=";
+            byte[] decodedBytes = null;
 
-            byte[] decodedBytes = Base64.decode(b64Payload, Base64.DEFAULT);
+            // 1. Try Hex decode if payload is pure hexadecimal
+            if (payloadStr.matches("^[0-9A-Fa-f]+$") && payloadStr.length() % 2 == 0) {
+                try {
+                    int len = payloadStr.length();
+                    byte[] hexBytes = new byte[len / 2];
+                    for (int i = 0; i < len; i += 2) {
+                        hexBytes[i / 2] = (byte) ((Character.digit(payloadStr.charAt(i), 16) << 4)
+                                             + Character.digit(payloadStr.charAt(i + 1), 16));
+                    }
+                    String testPayload = new String(hexBytes, StandardCharsets.UTF_8);
+                    if (testPayload.contains("|")) {
+                        decodedBytes = hexBytes;
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            // 2. Fallback to standard / URL-safe Base64 decode
+            if (decodedBytes == null) {
+                String b64 = payloadStr.replace("-", "+").replace("_", "/");
+                int mod = b64.length() % 4;
+                if (mod == 2) b64 += "==";
+                else if (mod == 3) b64 += "=";
+                decodedBytes = Base64.decode(b64, Base64.DEFAULT);
+            }
+
             String payload = new String(decodedBytes, StandardCharsets.UTF_8);
 
             String[] dataParts = payload.split("\\|");
@@ -120,10 +145,10 @@ public class LicenseManager {
             long expiryTime = Long.parseLong(dataParts[1].trim());
 
             // 1. Check Device ID match
-            String myDeviceId = getDeviceId(context).replace("-", "");
-            String cleanKeyDevice = keyDeviceId.replace("-", "");
+            String myDeviceId = getDeviceId(context).replace("-", "").trim();
+            String cleanKeyDevice = keyDeviceId.replace("-", "").trim();
             if (!myDeviceId.equalsIgnoreCase(cleanKeyDevice)) {
-                return new ValidationResult(false, "This license is registered for a different device!");
+                return new ValidationResult(false, "This license is registered for a different device! (Key Device: " + keyDeviceId + ", Your Phone: " + getDeviceId(context) + ")");
             }
 
             // 2. Cryptographic HMAC Signature check
@@ -140,7 +165,7 @@ public class LicenseManager {
             // Activation Success -> Save to secure prefs
             SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
             prefs.edit()
-                    .putString(KEY_LICENSE, key)
+                    .putString(KEY_LICENSE, rawKey)
                     .putLong(KEY_EXPIRY, expiryTime)
                     .putLong(KEY_LAST_SEEN, System.currentTimeMillis())
                     .putBoolean(KEY_BLACKLISTED, false)

@@ -166,6 +166,7 @@
                 android:textColor="#0F172A"
                 android:fontFamily="monospace"
                 android:textSize="13sp"
+                android:inputType="textNoSuggestions|textVisiblePassword"
                 android:paddingHorizontal="14dp"
                 android:layout_marginTop="8dp" />
 
