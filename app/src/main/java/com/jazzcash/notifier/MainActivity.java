@@ -614,7 +614,7 @@ public class MainActivity extends Activity {
 
                 // Channel Badge Styling
                 String effectiveChannel = tx.channel;
-                if (effectiveChannel == null || "bank".equalsIgnoreCase(effectiveChannel) || "outflow".equalsIgnoreCase(tx.type)) {
+                if (effectiveChannel == null || "bank".equalsIgnoreCase(effectiveChannel)) {
                     String found = PaymentProcessor.detectMentionedBank(tx.purpose + " " + tx.recipient + " " + tx.sender);
                     if (found != null) {
                         effectiveChannel = found;

@@ -55,16 +55,16 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v3.0.0-${{ github.run_number }}
-        name: PayVox v3.0.0 - Authentic Bank Logos, Exact Bank Name Tagging & Dual-Redundancy Capture
+        tag_name: v3.1.0-${{ github.run_number }}
+        name: PayVox v3.1.0 - Total Channel Isolation & Raast Inter-Bank Routing Fix
         body: |
-          ### 💜 PayVox v3.0.0 Production Release
+          ### 💜 PayVox v3.1.0 Production Release
 
           ✅ **Key Upgrades in this Release:**
-          - 🏦 **Authentic Bank Logos From Official Spec Sheet**: Extracted 10 high-resolution authentic Pakistani bank symbols (UBL, HBL, NBP, Meezan Bank, Bank Alfalah, Allied Bank, Bank AL Habib, MCB Bank, Bank of Punjab, Askari Bank) directly used in app dropdown and badges.
-          - 🏷️ **Exact Bank Name Tagging (Never Generic "BANK")**: Transaction cards now explicitly display the destination bank name (e.g. `MEEZAN BANK`, `UBL`, `HBL BANK`, `BANK ALFALAH`) instead of generic `BANK`.
-          - ⚡ **Dual-Redundancy SMS & Notification Capture**: Notification listener no longer ignores messaging apps (Google Messages, Samsung Messages). Even if OEM battery optimization delays `SMS_RECEIVED` broadcast, notifications instantly capture JazzCash & bank sent/received payments without drops.
-          - 📤 **100% Outflow vs Inflow Voice Precision**: Outgoing payments are clearly announced as *"JazzCash se [amount] rupay send ho gaye hain"*, while incoming announce *"par [amount] rupay receive ho gaye hain"*.
+          - 🎯 **Fixed Inter-Bank Raast Attribution Bug**: Prevented bank received SMS (e.g. from Meezan 8079) mentioning "via Raast from JAZZCASH" from falsely overriding the channel to JazzCash. Meezan alerts will ALWAYS announce as Meezan Bank.
+          - 📤 **Clean Outflow Separation**: Outgoing payments from JazzCash to Meezan Bank now explicitly state *"JazzCash se [amount] rupay send ho gaye hain"*, and incoming credits state *"Meezan Bank par [amount] rupay receive ho gaye hain"*.
+          - 📢 **Non-Conflicting Audio Queue**: Replaced TTS QUEUE_FLUSH with QUEUE_ADD so sequential dual-alerts (Debit + Credit) speak completely without cancelling each other.
+          - 🏦 **Authentic Bank Logos**: 10 official Pakistani bank icons cropped from specification sheet.
           - 👑 **Universal Master Testing License**: `PV-MASTER-2026-VIP` (10-Year VIP Active)
 
           **Direct Download:** Click `PayVox.apk` below to download and install.

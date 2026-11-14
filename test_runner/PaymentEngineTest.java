@@ -102,16 +102,17 @@ public class PaymentEngineTest {
         }
 
         // PRIORITY 2: SENDER WAS GENERIC / UNIDENTIFIED -> CHECK MESSAGE CONTENT
-        if (m.contains("jazzcash") || m.contains("till id")) return "jazzcash";
-        if (m.contains("easypaisa")) return "easypaisa";
-        if (m.contains("meezan bank") || m.contains("meezan account") || m.contains("meezan a/c") || m.contains("meezan")) return "meezan";
-        if (m.contains("bank alfalah") || m.contains("alfalah") || m.contains("bafl")) return "alfalah";
-        if (m.contains("habib bank") || m.contains("hbl alert") || m.contains("hbl a/c") || m.contains("hbl")) return "hbl";
-        if (m.contains("ubl digital") || m.contains("ubl alert") || m.contains("ubl a/c") || m.contains("ubl")) return "ubl";
-        if (m.contains("mcb bank") || m.contains("mcb alert") || m.contains("mcb")) return "mcb";
-        if (m.contains("allied bank") || Pattern.compile("\\babl\\b", Pattern.CASE_INSENSITIVE).matcher(m).find() || m.contains("allied")) return "allied";
-        if (m.contains("faysal bank") || m.contains("faysal")) return "faysal";
-        if (m.contains("askari bank") || m.contains("askari")) return "askari";
+        // First check which specific bank account or wallet is credited/debited:
+        if (m.contains("meezan account") || m.contains("meezan a/c") || m.contains("meezan bank") || m.contains("in your meezan")) return "meezan";
+        if (m.contains("bank alfalah") || m.contains("alfalah account") || m.contains("alfalah a/c") || m.contains("bafl")) return "alfalah";
+        if (m.contains("habib bank") || m.contains("hbl account") || m.contains("hbl a/c") || m.contains("hbl alert")) return "hbl";
+        if (m.contains("ubl digital") || m.contains("ubl account") || m.contains("ubl a/c") || m.contains("ubl alert")) return "ubl";
+        if (m.contains("mcb bank") || m.contains("mcb account") || m.contains("mcb a/c")) return "mcb";
+        if (m.contains("national bank") || Pattern.compile("\\bnbp\\b", Pattern.CASE_INSENSITIVE).matcher(m).find()) return "nbp";
+        if (m.contains("bank al habib") || m.contains("al habib account") || Pattern.compile("\\bbahl\\b", Pattern.CASE_INSENSITIVE).matcher(m).find()) return "alhabib";
+        if (m.contains("allied bank") || Pattern.compile("\\babl\\b", Pattern.CASE_INSENSITIVE).matcher(m).find()) return "allied";
+        if (m.contains("faysal bank") || m.contains("faysal account")) return "faysal";
+        if (m.contains("askari bank") || m.contains("askari account")) return "askari";
         if (m.contains("bank of punjab") || m.contains("bop")) return "bop";
         if (m.contains("js bank") || m.contains("jsbank")) return "jsbank";
         if (m.contains("soneri bank") || m.contains("soneri")) return "soneri";
@@ -121,6 +122,30 @@ public class PaymentEngineTest {
         if (m.contains("al baraka") || m.contains("albaraka")) return "albaraka";
         if (m.contains("dubai islamic") || m.contains("dib alert") || m.contains("dib")) return "dib";
         if (m.contains("standard chartered") || m.contains("scb")) return "scb";
+
+        // If the message has "meezan" anywhere and not "to meezan" (for an incoming alert):
+        if (m.contains("meezan") && !m.contains("sent to meezan") && !m.contains("transfer to meezan")) return "meezan";
+
+        boolean isJazzCashCounterparty = Pattern.compile("\\b(?:from|via\\s*raast)\\b.*?\\bjazzcash\\b", Pattern.CASE_INSENSITIVE).matcher(m).find();
+        boolean isEasypaisaCounterparty = Pattern.compile("\\b(?:from|via\\s*raast)\\b.*?\\beasypaisa\\b", Pattern.CASE_INSENSITIVE).matcher(m).find();
+
+        // Genuine JazzCash alerts (only if NOT an IBFT/Raast counterparty mention)
+        if (m.contains("thank you for using jazzcash") ||
+            m.contains("jazzcash mobile account") ||
+            m.contains("jazzcash business account") ||
+            m.contains("in your jazzcash") ||
+            m.contains("till id") ||
+            (m.startsWith("txid:") && m.contains("qr payment")) ||
+            (m.contains("jazzcash") && !isJazzCashCounterparty)) {
+            return "jazzcash";
+        }
+
+        // Genuine Easypaisa alerts (only if NOT an IBFT/Raast counterparty mention)
+        if (m.contains("in your easypaisa") ||
+            m.contains("easypaisa mobile account") ||
+            (m.contains("easypaisa") && !isEasypaisaCounterparty)) {
+            return "easypaisa";
+        }
 
         if (m.contains("raast") || m.contains("a/c") || m.contains("account")) return "bank";
 
@@ -415,6 +440,18 @@ public class PaymentEngineTest {
                 "BAHL",
                 "Dear Customer, your Bank AL Habib Account 1010... has been credited with PKR 6,200.00 via Raast. Available balance: PKR 22,000.00",
                 "alhabib", "inflow", 6200.0, "Bank AL Habib par 6200 rupay receive ho gaye hain"));
+
+        // 18. Meezan Received from JazzCash via Raast (Meezan Inflow, NOT JazzCash!)
+        tests.add(new TestCase("18. Meezan Received via Raast from JazzCash (Must be Meezan Inflow)",
+                "8079",
+                "Dear Customer, your Meezan A/C 22020108012057 has been credited with PKR 9,177.00 on 14-Nov-2026 via Raast from 03001234567 (JAZZCASH). Avail Bal PKR 25,000.00",
+                "meezan", "inflow", 9177.0, "Meezan Bank par 9177 rupay receive ho gaye hain"));
+
+        // 19. Generic Raast credit from JazzCash (Must be Bank Inflow, NEVER JazzCash!)
+        tests.add(new TestCase("19. Generic Sender Credit from JazzCash (Must be Bank Inflow, never JazzCash)",
+                "Raast",
+                "Dear Customer, A/C *12057 credited with PKR 9,177.00 via Raast from 03001234567 JAZZCASH Ref 730069976433",
+                "bank", "inflow", 9177.0, "Bank par 9177 rupay receive ho gaye hain"));
 
         int passed = 0;
         int failed = 0;

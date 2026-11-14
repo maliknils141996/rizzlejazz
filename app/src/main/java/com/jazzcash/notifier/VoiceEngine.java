@@ -154,9 +154,10 @@ public class VoiceEngine {
             Bundle params = new Bundle();
             params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f); // 100% max software gain
             params.putString(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(AudioManager.STREAM_MUSIC));
-            params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "PAYMENT_ANNOUNCE");
+            String uid = "PAYMENT_" + System.currentTimeMillis();
+            params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, uid);
 
-            tts.speak(text, TextToSpeech.QUEUE_FLUSH, params, "PAYMENT_ANNOUNCE");
+            tts.speak(text, TextToSpeech.QUEUE_ADD, params, uid);
         } else {
             initTts();
         }
